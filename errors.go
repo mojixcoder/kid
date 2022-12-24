@@ -11,6 +11,9 @@ type HTTPError struct {
 	Err     error `json:"-"`
 }
 
+// Verifying interface compliance.
+var _ error = (*HTTPError)(nil)
+
 func (e *HTTPError) Error() string {
 	if e.Err == nil {
 		return fmt.Sprintf(`{"code": %d, "message": %q}`, e.Code, e.Message)
