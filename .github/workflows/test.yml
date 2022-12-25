@@ -1,0 +1,46 @@
+name: Test
+
+on:
+  push:
+    branches: 
+      - "main"
+  pull_request:
+    branches: 
+      - "main"
+
+env:
+  # Upload coverage only for this go version.
+  LATEST_GO_VERSION: "1.19"
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "macos-latest"]
+        go: ["1.18", "1.19"]
+
+    name: ${{ matrix.os }} & Go ${{ matrix.go }}
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up ${{ matrix.go }}
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+
+      - name: Test
+        run: | 
+          go vet ./...
+          go test -v -race -coverprofile=coverage.out -covermode=atomic $(go list ./... | grep -v /examples)
+
+      - name: Upload coverage
+        if: success() && matrix.go == env.LATEST_GO_VERSION && matrix.os == 'ubuntu-latest'
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: "coverage.out"
+          force-coverage-parser: "go"
