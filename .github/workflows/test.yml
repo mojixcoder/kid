@@ -35,7 +35,7 @@ jobs:
       - name: Test
         run: | 
           go vet ./...
-          go test -v -race -coverprofile=coverage.out -covermode=atomic $(go list ./... | grep -v /examples/)
+          go test -v -race -coverprofile=coverage.out -covermode=atomic $(go list ./... | grep -v /examples)
 
       - name: Upload coverage
         if: success() && matrix.go == env.LATEST_GO_VERSION && matrix.os == 'ubuntu-latest'
