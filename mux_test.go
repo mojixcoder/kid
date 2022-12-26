@@ -9,12 +9,12 @@ import (
 )
 
 var (
-	testHandlerFunc HandlerFunc = func(c Context) error {
+	testHandlerFunc HandlerFunc = func(c *Context) error {
 		return nil
 	}
 
 	testMiddlewareFunc MiddlewareFunc = func(next HandlerFunc) HandlerFunc {
-		return func(c Context) error {
+		return func(c *Context) error {
 			return next(c)
 		}
 	}

@@ -7,17 +7,21 @@ import (
 )
 
 type (
+	// JSONSerializer is the interface for marshaling and unmarshling JSON data.
 	JSONSerializer interface {
-		Marshal(Context, any, string) error
-		Unmarshal(Context, any) error
+		Marshal(*Context, any, string) error
+		Unmarshal(*Context, any) error
 	}
+
+	// defaultJSONSerializer is the default Kid's JSON serializer.
 	defaultJSONSerializer struct{}
 )
 
 // Verifying interface compliance.
 var _ JSONSerializer = defaultJSONSerializer{}
 
-func (s defaultJSONSerializer) Marshal(c Context, obj any, indent string) error {
+// Marshal writes the given object as JSON to response.
+func (s defaultJSONSerializer) Marshal(c *Context, obj any, indent string) error {
 	encoder := json.NewEncoder(c.Response())
 	encoder.SetIndent("", indent)
 
@@ -28,7 +32,8 @@ func (s defaultJSONSerializer) Marshal(c Context, obj any, indent string) error 
 	return nil
 }
 
-func (s defaultJSONSerializer) Unmarshal(c Context, obj any) error {
+// Unmarshal reads request's body as JSON and puts it in the given obj.
+func (s defaultJSONSerializer) Unmarshal(c *Context, obj any) error {
 	err := json.NewDecoder(c.Request().Body).Decode(obj)
 
 	jsonErr := &json.SyntaxError{}
