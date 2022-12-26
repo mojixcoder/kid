@@ -6,16 +6,19 @@ import (
 	"strings"
 )
 
+// Errors.
 var (
 	errNotFound         = errors.New("match not found")
 	errMethodNotAllowed = errors.New("method is not allowed")
 )
 
 type (
+	// Router is the struct which holds all of the routes.
 	Router struct {
 		routes []Route
 	}
 
+	// Route is a route with its contents.
 	Route struct {
 		segments    []Segment
 		methods     []string
@@ -23,18 +26,22 @@ type (
 		middlewares []MiddlewareFunc
 	}
 
+	// Segment is the type of each path segment.
 	Segment struct {
 		isParam bool
 		tpl     string
 	}
 
+	// Params is the type of path parameters.
 	Params map[string]string
 )
 
+// newRouter returns a new router.
 func newRouter() Router {
 	return Router{routes: make([]Route, 0)}
 }
 
+// add adds a route to the router.
 func (router *Router) add(path string, handler HandlerFunc, methods []string, middlewares []MiddlewareFunc) {
 	if len(methods) == 0 {
 		panic("providing at least one method is required")
@@ -61,6 +68,7 @@ func (router *Router) add(path string, handler HandlerFunc, methods []string, mi
 	router.routes = append(router.routes, Route{segments: routeSegments, methods: methods, handler: handler, middlewares: middlewares})
 }
 
+// match determines if the given path and method matches the route.
 func (route *Route) match(path, method string) (Params, error) {
 	params := make(Params)
 	var end bool
@@ -108,6 +116,7 @@ func (route *Route) match(path, method string) (Params, error) {
 	return params, nil
 }
 
+// find finds a route which matches the given path and method.
 func (router *Router) find(path string, method string) (Route, Params, error) {
 	path = cleanPath(path, true)[1:]
 
@@ -130,6 +139,9 @@ func (router *Router) find(path string, method string) (Route, Params, error) {
 
 }
 
+// cleanPath normalizes the path.
+//
+// If soft is false it also removes duplicate slashes.
 func cleanPath(s string, soft bool) string {
 	if s == "" {
 		return "/"
@@ -155,6 +167,7 @@ func cleanPath(s string, soft bool) string {
 	return buff.String()
 }
 
+// methodExists checks whether a method exists in a slice of methods.
 func methodExists(method string, methods []string) bool {
 	for _, v := range methods {
 		if v == method {
