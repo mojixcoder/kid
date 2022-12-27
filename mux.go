@@ -122,6 +122,11 @@ func (router *Router) find(path string, method string) (Route, Params, error) {
 
 	var returnedErr error
 
+	// We have no routes, so anything won't be found.
+	if len(router.routes) == 0 {
+		return Route{}, nil, errNotFound
+	}
+
 	for _, route := range router.routes {
 		params, err := route.match(path, method)
 		if err == nil {
