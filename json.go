@@ -2,15 +2,17 @@ package kid
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 )
 
 type (
 	// JSONSerializer is the interface for marshaling and unmarshling JSON data.
 	JSONSerializer interface {
-		Marshal(*Context, any, string) error
-		Unmarshal(*Context, any) error
+		// Write writes object with the given object to response.
+		Write(c *Context, in any, indent string) error
+
+		// Read reads request's body to the given object.
+		Read(c *Context, out any) error
 	}
 
 	// defaultJSONSerializer is the default Kid's JSON serializer.
@@ -21,11 +23,11 @@ type (
 var _ JSONSerializer = defaultJSONSerializer{}
 
 // Marshal writes the given object as JSON to response.
-func (s defaultJSONSerializer) Marshal(c *Context, obj any, indent string) error {
+func (s defaultJSONSerializer) Write(c *Context, in any, indent string) error {
 	encoder := json.NewEncoder(c.Response())
 	encoder.SetIndent("", indent)
 
-	if err := encoder.Encode(obj); err != nil {
+	if err := encoder.Encode(in); err != nil {
 		return NewHTTPError(http.StatusInternalServerError).WithMessage(err.Error()).WithError(err)
 	}
 
@@ -33,13 +35,12 @@ func (s defaultJSONSerializer) Marshal(c *Context, obj any, indent string) error
 }
 
 // Unmarshal reads request's body as JSON and puts it in the given obj.
-func (s defaultJSONSerializer) Unmarshal(c *Context, obj any) error {
-	err := json.NewDecoder(c.Request().Body).Decode(obj)
+func (s defaultJSONSerializer) Read(c *Context, out any) error {
+	err := json.NewDecoder(c.Request().Body).Decode(out)
 
-	jsonErr := &json.SyntaxError{}
-	typeErr := &json.UnmarshalTypeError{}
-
-	if errors.As(err, &jsonErr) || errors.As(err, &typeErr) {
+	if _, ok := err.(*json.SyntaxError); ok {
+		return NewHTTPError(http.StatusBadRequest).WithMessage(err.Error()).WithError(err)
+	} else if _, ok := err.(*json.UnmarshalTypeError); ok {
 		return NewHTTPError(http.StatusBadRequest).WithMessage(err.Error()).WithError(err)
 	} else if err != nil {
 		return NewHTTPError(http.StatusInternalServerError).WithMessage(err.Error()).WithError(err)
