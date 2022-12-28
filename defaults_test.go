@@ -21,7 +21,7 @@ func setupKid() *Kid {
 	})
 
 	k.GET("/error", func(c *Context) error {
-		return errors.New("something went wrong!")
+		return errors.New("something went wrong")
 	})
 
 	k.HEAD("/error-head", func(c *Context) error {
