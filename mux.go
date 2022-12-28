@@ -29,6 +29,7 @@ type (
 	// Segment is the type of each path segment.
 	Segment struct {
 		isParam bool
+		isPlus  bool
 		tpl     string
 	}
 
@@ -57,8 +58,20 @@ func (router *Router) add(path string, handler HandlerFunc, methods []string, mi
 
 	routeSegments := make([]Segment, 0, len(segments))
 
-	for _, segment := range segments {
-		if strings.HasPrefix(segment, "{") && strings.HasSuffix(segment, "}") {
+	for i, segment := range segments {
+		if strings.HasPrefix(segment, "{+") && strings.HasSuffix(segment, "}") {
+			if i == len(segments)-1 {
+				routeSegments = append(routeSegments, Segment{isParam: true, isPlus: true, tpl: segment[2 : len(segment)-1]})
+			} else if i == len(segments)-2 {
+				if segments[i+1] != "" {
+					panic("plus path parameters can only be the last part of a path")
+				}
+				routeSegments = append(routeSegments, Segment{isParam: true, isPlus: true, tpl: segment[2 : len(segment)-1]})
+				break
+			} else {
+				panic("plus path parameters can only be the last part of a path")
+			}
+		} else if strings.HasPrefix(segment, "{") && strings.HasSuffix(segment, "}") {
 			routeSegments = append(routeSegments, Segment{isParam: true, tpl: segment[1 : len(segment)-1]})
 		} else {
 			routeSegments = append(routeSegments, Segment{isParam: false, tpl: segment})
@@ -89,6 +102,18 @@ func (route *Route) match(path, method string) (Params, error) {
 		}
 
 		if segment.isParam {
+			if segment.isPlus {
+				if len(path) == 0 {
+					return nil, errNotFound
+				}
+
+				end = true
+				params[segment.tpl] = path
+
+				// Break because it's always the last part of the path.
+				break
+			}
+
 			params[segment.tpl] = path[:i]
 
 			// Empty parameter
@@ -121,6 +146,11 @@ func (router *Router) find(path string, method string) (Route, Params, error) {
 	path = cleanPath(path, true)[1:]
 
 	var returnedErr error
+
+	// We have no routes, so anything won't be found.
+	if len(router.routes) == 0 {
+		return Route{}, nil, errNotFound
+	}
 
 	for _, route := range router.routes {
 		params, err := route.match(path, method)
