@@ -62,11 +62,23 @@ func TestAdd(t *testing.T) {
 		router.add("/", nil, []string{http.MethodGet}, nil)
 	})
 
+	assert.PanicsWithValue(t, "plus path parameters can only be the last part of a path", func() {
+		router.add("/path/{+extraPath}/asd", testHandlerFunc, []string{http.MethodGet}, nil)
+	})
+
+	assert.PanicsWithValue(t, "plus path parameters can only be the last part of a path", func() {
+		router.add("/path/{+extraPath}/test/test2", testHandlerFunc, []string{http.MethodGet}, nil)
+	})
+
 	router.add("/test/list/", testHandlerFunc, []string{http.MethodGet}, nil)
 
 	router.add("/test/{var}/get", testHandlerFunc, []string{http.MethodGet, http.MethodPost}, []MiddlewareFunc{testMiddlewareFunc})
 
-	assert.Equal(t, 2, len(router.routes))
+	router.add("/test/{+extraPath}", testHandlerFunc, []string{http.MethodPost}, nil)
+
+	router.add("/path/{+extraPath}/", testHandlerFunc, []string{http.MethodDelete}, nil)
+
+	assert.Equal(t, 4, len(router.routes))
 
 	testCases := []struct {
 		route Route
@@ -88,6 +100,24 @@ func TestAdd(t *testing.T) {
 				handler:     testHandlerFunc,
 				segments:    []Segment{{isParam: false, tpl: "test"}, {isParam: true, tpl: "var"}, {isParam: false, tpl: "get"}},
 				middlewares: []MiddlewareFunc{testMiddlewareFunc},
+			},
+		},
+		{
+			name: "/test/{+extraPath}",
+			route: Route{
+				methods:     []string{http.MethodPost},
+				handler:     testHandlerFunc,
+				segments:    []Segment{{isParam: false, isPlus: false, tpl: "test"}, {isParam: true, isPlus: true, tpl: "extraPath"}},
+				middlewares: nil,
+			},
+		},
+		{
+			name: "/path/{+extraPath}",
+			route: Route{
+				methods:     []string{http.MethodDelete},
+				handler:     testHandlerFunc,
+				segments:    []Segment{{isParam: false, isPlus: false, tpl: "path"}, {isParam: true, isPlus: true, tpl: "extraPath"}},
+				middlewares: nil,
 			},
 		},
 	}
@@ -117,9 +147,11 @@ func TestMatch(t *testing.T) {
 
 	router.add("/", testHandlerFunc, []string{http.MethodGet}, nil)
 	router.add("/test/{var}/get", testHandlerFunc, []string{http.MethodGet, http.MethodPost}, nil)
+	router.add("/test/{var}/get/{+extraPath}", testHandlerFunc, []string{http.MethodPut}, nil)
 
 	firstRoute := router.routes[0]
 	secondRoute := router.routes[1]
+	plusRoute := router.routes[2]
 
 	// Don't need to add starting slash in route's match method as they are skipped in router's find method.
 	// For matching we should match relative paths, not abosulute paths.
@@ -180,6 +212,24 @@ func TestMatch(t *testing.T) {
 
 	// Path varibales are required and cannot be empty.
 	params, err = secondRoute.match("test//get", http.MethodGet)
+	assert.ErrorIs(t, err, errNotFound)
+	assert.Nil(t, params)
+
+	// Testing plus route.
+	params, err = plusRoute.match("test/123/get/extra/path", http.MethodPut)
+	assert.NoError(t, err)
+	assert.Equal(t, Params{"var": "123", "extraPath": "extra/path"}, params)
+
+	params, err = plusRoute.match("test/123/get/extra/path", http.MethodGet)
+	assert.ErrorIs(t, err, errMethodNotAllowed)
+	assert.Nil(t, params)
+
+	params, err = plusRoute.match("test//get/extra/path", http.MethodGet)
+	assert.ErrorIs(t, err, errNotFound)
+	assert.Nil(t, params)
+
+	// At least one extra path is required
+	params, err = plusRoute.match("test/123/get/", http.MethodGet)
 	assert.ErrorIs(t, err, errNotFound)
 	assert.Nil(t, params)
 }
