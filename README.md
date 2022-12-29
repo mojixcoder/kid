@@ -1,6 +1,6 @@
+![test](https://github.com/mojixcoder/kid/actions/workflows/test.yml/badge.svg)
 [![code quality](https://app.codacy.com/project/badge/Grade/aa9e650027e144359ae6f3cbdcdae6c9)](https://www.codacy.com/gh/mojixcoder/kid/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mojixcoder/kid&amp;utm_campaign=Badge_Grade)
 [![coverage](https://app.codacy.com/project/badge/Coverage/aa9e650027e144359ae6f3cbdcdae6c9)](https://www.codacy.com/gh/mojixcoder/kid/dashboard?utm_source=github.com&utm_medium=referral&utm_content=mojixcoder/kid&utm_campaign=Badge_Coverage)
-![pipeline](https://github.com/mojixcoder/kid/actions/workflows/test.yml/badge.svg)
 
 ### Kid Micro Web Framework
 ___
