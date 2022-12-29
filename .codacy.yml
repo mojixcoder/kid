@@ -1,0 +1,9 @@
+---
+engines:
+  duplication:
+    enabled: true
+    exclude_paths:
+      - '**_test.go'
+
+exclude_paths:
+  - "examples/**"
