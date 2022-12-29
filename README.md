@@ -1,5 +1,8 @@
 
 ### Kid Micro Web Framework
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b91128bedfa440f4a17d14ba66bfec3b)](https://app.codacy.com/gh/mojixcoder/kid?utm_source=github.com&utm_medium=referral&utm_content=mojixcoder/kid&utm_campaign=Badge_Grade_Settings)
+
 ___
 **Kid** is a micro web framework written in Go. It aims to keep its core simple and yet powerful.
 
