@@ -2,6 +2,7 @@ package kid
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 )
 
@@ -41,6 +42,8 @@ func (s defaultJSONSerializer) Read(c *Context, out any) error {
 	if _, ok := err.(*json.SyntaxError); ok {
 		return NewHTTPError(http.StatusBadRequest).WithMessage(err.Error()).WithError(err)
 	} else if _, ok := err.(*json.UnmarshalTypeError); ok {
+		return NewHTTPError(http.StatusBadRequest).WithMessage(err.Error()).WithError(err)
+	} else if err == io.ErrUnexpectedEOF {
 		return NewHTTPError(http.StatusBadRequest).WithMessage(err.Error()).WithError(err)
 	} else if err != nil {
 		return NewHTTPError(http.StatusInternalServerError).WithMessage(err.Error()).WithError(err)

@@ -17,6 +17,12 @@ type Context struct {
 	lock     sync.Mutex
 }
 
+// newContext returns a new empty context.
+func newContext(k *Kid) *Context {
+	c := Context{kid: k}
+	return &c
+}
+
 // reset resets the context.
 func (c *Context) reset(request *http.Request, response http.ResponseWriter) {
 	c.request = request
@@ -60,7 +66,11 @@ func (c *Context) QueryParam(name string) string {
 //
 // Useful when query parameters are like ?name=x&name=y.
 func (c *Context) QueryParamMultiple(name string) []string {
-	return c.request.URL.Query()[name]
+	params := c.request.URL.Query()[name]
+	if params == nil {
+		return []string{}
+	}
+	return params
 }
 
 // QueryParams returns all of the query parameters.
@@ -100,8 +110,11 @@ func (c *Context) NoContent(code int) {
 
 // writeContentType sets content type of response.
 func (c *Context) writeContentType(contentType string) {
+	contentTypeHeader := "Content-Type"
 	header := c.response.Header()
-	header.Set("Content-Type", contentType)
+	if header.Get(contentTypeHeader) == "" {
+		header.Set(contentTypeHeader, contentType)
+	}
 }
 
 // Set sets a key-value pair to current request's context.
