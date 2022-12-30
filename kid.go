@@ -45,20 +45,10 @@ func New() *Kid {
 	}
 
 	kid.pool.New = func() any {
-		return kid.newContext()
+		return newContext(&kid)
 	}
 
 	return &kid
-}
-
-// newContext returns a new empty context.
-func (k *Kid) newContext() *Context {
-	ctx := Context{
-		storage: make(Map),
-		params:  make(Params),
-		kid:     k,
-	}
-	return &ctx
 }
 
 // Run runs HTTP server.

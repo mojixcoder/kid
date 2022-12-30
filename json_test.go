@@ -3,6 +3,7 @@ package kid
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -17,11 +18,9 @@ type person struct {
 }
 
 func TestDefaultJSONSerializerWrite(t *testing.T) {
-	k := New()
-
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	res := httptest.NewRecorder()
-	c := k.newContext()
+	c := newContext(New())
 	c.reset(req, res)
 
 	serializer := defaultJSONSerializer{}
@@ -58,11 +57,9 @@ func TestDefaultJSONSerializerWrite(t *testing.T) {
 }
 
 func TestDefaultJSONSerializerRead(t *testing.T) {
-	k := New()
-
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader("{\"name\":\"Mojix\",\"age\":22}"))
 	res := httptest.NewRecorder()
-	c := k.newContext()
+	c := newContext(New())
 	c.reset(req, res)
 
 	serializer := defaultJSONSerializer{}
@@ -111,4 +108,15 @@ func TestDefaultJSONSerializerRead(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, http.StatusBadRequest, err.(*HTTPError).Code)
 	assert.True(t, ok)
+
+	req = httptest.NewRequest(http.MethodGet, "/", strings.NewReader("{\"name\":\"Mojix\",\"age\":22"))
+	res = httptest.NewRecorder()
+	c.reset(req, res)
+
+	httpErr = serializer.Read(c, &p2).(*HTTPError)
+
+	assert.Error(t, httpErr)
+	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+	assert.ErrorIs(t, httpErr.Err, io.ErrUnexpectedEOF)
+	assert.Equal(t, io.ErrUnexpectedEOF.Error(), httpErr.Message)
 }
