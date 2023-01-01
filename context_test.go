@@ -1,6 +1,7 @@
 package kid
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -279,4 +280,23 @@ func TestContextJSONIndent(t *testing.T) {
 	assert.Error(t, httpErr)
 	assert.Error(t, httpErr.Err)
 	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
+}
+
+func TestContextJSONByte(t *testing.T) {
+	ctx := newContext(New())
+
+	res := httptest.NewRecorder()
+
+	ctx.reset(nil, res)
+
+	p := person{Name: "foo", Age: 1999}
+
+	blob, err := json.Marshal(p)
+	assert.NoError(t, err)
+
+	err = ctx.JSONByte(http.StatusOK, blob)
+
+	assert.NoError(t, err)
+	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	assert.Equal(t, "{\"name\":\"foo\",\"age\":1999}", res.Body.String())
 }
