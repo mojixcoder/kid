@@ -97,6 +97,15 @@ func (c *Context) JSONIndent(code int, obj any, indent string) error {
 	return c.kid.jsonSerializer.Write(c, obj, indent)
 }
 
+// JSONByte sends JSON response with the given status code.
+// Writes JSON blob untouched to response.
+func (c *Context) JSONByte(code int, blob []byte) error {
+	c.writeContentType("application/json")
+	c.response.WriteHeader(code)
+	_, err := c.Response().Write(blob)
+	return err
+}
+
 // ReadJSON reads request's body as JSON and stores it in the given object.
 // The object must be a pointer.
 func (c *Context) ReadJSON(out any) error {
