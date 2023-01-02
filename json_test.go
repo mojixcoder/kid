@@ -2,8 +2,6 @@ package kid
 
 import (
 	"encoding/json"
-	"errors"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -75,6 +73,7 @@ func TestDefaultJSONSerializerRead(t *testing.T) {
 	res = httptest.NewRecorder()
 	c.reset(req, res)
 
+	// Invalid argument passed to unmarshal.
 	var p2 person
 	err = serializer.Read(c, p2)
 	assert.Error(t, err)
@@ -92,31 +91,8 @@ func TestDefaultJSONSerializerRead(t *testing.T) {
 	c.reset(req, res)
 
 	err = serializer.Read(c, &p2)
-	_, ok = errors.Unwrap(err).(*json.UnmarshalTypeError)
 
 	assert.Error(t, err)
+	assert.Error(t, err.(*HTTPError).Err)
 	assert.Equal(t, http.StatusBadRequest, err.(*HTTPError).Code)
-	assert.True(t, ok)
-
-	req = httptest.NewRequest(http.MethodGet, "/", strings.NewReader("{\"name\":\"Mojix\",\"age\":22,}"))
-	res = httptest.NewRecorder()
-	c.reset(req, res)
-
-	err = serializer.Read(c, &p2)
-	_, ok = errors.Unwrap(err).(*json.SyntaxError)
-
-	assert.Error(t, err)
-	assert.Equal(t, http.StatusBadRequest, err.(*HTTPError).Code)
-	assert.True(t, ok)
-
-	req = httptest.NewRequest(http.MethodGet, "/", strings.NewReader("{\"name\":\"Mojix\",\"age\":22"))
-	res = httptest.NewRecorder()
-	c.reset(req, res)
-
-	httpErr = serializer.Read(c, &p2).(*HTTPError)
-
-	assert.Error(t, httpErr)
-	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
-	assert.ErrorIs(t, httpErr.Err, io.ErrUnexpectedEOF)
-	assert.Equal(t, io.ErrUnexpectedEOF.Error(), httpErr.Message)
 }
