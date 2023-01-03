@@ -3,8 +3,6 @@ package serializer
 import (
 	"encoding/json"
 	"net/http"
-
-	"github.com/mojixcoder/kid/errors"
 )
 
 // defaultJSONSerializer is the default Kid's JSON serializer.
@@ -25,7 +23,7 @@ func (s defaultJSONSerializer) Write(w http.ResponseWriter, in any, indent strin
 	encoder.SetIndent("", indent)
 
 	if err := encoder.Encode(in); err != nil {
-		return errors.NewHTTPError(http.StatusInternalServerError).WithMessage(err.Error()).WithError(err)
+		return newHTTPErrorFromError(http.StatusInternalServerError, err)
 	}
 
 	return nil
@@ -35,9 +33,9 @@ func (s defaultJSONSerializer) Write(w http.ResponseWriter, in any, indent strin
 func (s defaultJSONSerializer) Read(req *http.Request, out any) error {
 	if err := json.NewDecoder(req.Body).Decode(out); err != nil {
 		if _, ok := err.(*json.InvalidUnmarshalError); ok {
-			return errors.NewHTTPError(http.StatusInternalServerError).WithMessage(err.Error()).WithError(err)
+			return newHTTPErrorFromError(http.StatusInternalServerError, err)
 		}
-		return errors.NewHTTPError(http.StatusBadRequest).WithMessage(err.Error()).WithError(err)
+		return newHTTPErrorFromError(http.StatusBadRequest, err)
 	}
 	return nil
 }

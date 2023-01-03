@@ -3,8 +3,6 @@ package serializer
 import (
 	"encoding/xml"
 	"net/http"
-
-	"github.com/mojixcoder/kid/errors"
 )
 
 type defaultXMLSerializer struct {
@@ -24,7 +22,7 @@ func (s defaultXMLSerializer) Write(w http.ResponseWriter, in any, indent string
 	encoder.Indent("", indent)
 
 	if err := encoder.Encode(in); err != nil {
-		return errors.NewHTTPError(http.StatusInternalServerError).WithMessage(err.Error()).WithError(err)
+		return newHTTPErrorFromError(http.StatusInternalServerError, err)
 	}
 
 	return nil
@@ -34,9 +32,9 @@ func (s defaultXMLSerializer) Write(w http.ResponseWriter, in any, indent string
 func (s defaultXMLSerializer) Read(req *http.Request, out any) error {
 	if err := xml.NewDecoder(req.Body).Decode(out); err != nil {
 		if err.Error() == "non-pointer passed to Unmarshal" {
-			return errors.NewHTTPError(http.StatusInternalServerError).WithMessage(err.Error()).WithError(err)
+			return newHTTPErrorFromError(http.StatusInternalServerError, err)
 		}
-		return errors.NewHTTPError(http.StatusBadRequest).WithMessage(err.Error()).WithError(err)
+		return newHTTPErrorFromError(http.StatusBadRequest, err)
 	}
 	return nil
 }
