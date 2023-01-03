@@ -11,8 +11,8 @@ import (
 )
 
 type person struct {
-	Name string `json:"name"`
-	Age  int    `json:"age"`
+	Name string `json:"name" xml:"name"`
+	Age  int    `json:"age" xml:"age"`
 }
 
 func TestDefaultJSONSerializerWrite(t *testing.T) {
