@@ -22,7 +22,7 @@ import (
     "github.com/mojixcoder/kid"
 )
 
-func  main() {
+func main() {
     k := kid.New()
 
     k.GET("/hello", helloHandler)
@@ -30,7 +30,7 @@ func  main() {
     k.Run()
 }
 
-func  helloHandler(c *kid.Context) error {
+func helloHandler(c *kid.Context) error {
     return c.JSON(http.StatusOK, kid.Map{"message": "Hello Kid!"})
 }
 ```
