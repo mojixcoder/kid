@@ -2,6 +2,7 @@ package kid
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -247,6 +248,7 @@ func TestContextJSON(t *testing.T) {
 	err := ctx.JSON(http.StatusCreated, &p)
 
 	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, res.Code)
 	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	assert.Equal(t, "{\"name\":\"foo\",\"age\":1999}\n", res.Body.String())
 
@@ -272,6 +274,7 @@ func TestContextJSONIndent(t *testing.T) {
 	err := ctx.JSONIndent(http.StatusCreated, &p, "    ")
 
 	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, res.Code)
 	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	assert.Equal(t, "{\n    \"name\": \"foo\",\n    \"age\": 1999\n}\n", res.Body.String())
 
@@ -301,6 +304,104 @@ func TestContextJSONByte(t *testing.T) {
 	err = ctx.JSONByte(http.StatusOK, blob)
 
 	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, res.Code)
 	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	assert.Equal(t, "{\"name\":\"foo\",\"age\":1999}", res.Body.String())
+}
+
+func TestContextReadXML(t *testing.T) {
+	ctx := newContext(New())
+
+	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader("<person><name>Mojix</name><age>22</age></person>"))
+
+	ctx.reset(req, nil)
+
+	var p person
+	err := ctx.ReadXML(&p)
+	assert.NoError(t, err)
+
+	assert.Equal(t, person{Name: "Mojix", Age: 22}, p)
+
+	req = httptest.NewRequest(http.MethodGet, "/", strings.NewReader("<person><name>Mojix</name><age>22</age></person"))
+
+	ctx.reset(req, nil)
+
+	var p2 person
+	httpErr := ctx.ReadXML(&p2).(*errors.HTTPError)
+
+	assert.Error(t, httpErr)
+	assert.Error(t, httpErr.Err)
+	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+}
+
+func TestContextXML(t *testing.T) {
+	ctx := newContext(New())
+
+	res := httptest.NewRecorder()
+
+	ctx.reset(nil, res)
+
+	p := person{Name: "foo", Age: 1999}
+	err := ctx.XML(http.StatusCreated, &p)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, res.Code)
+	assert.Equal(t, "application/xml", res.Header().Get("Content-Type"))
+	assert.Equal(t, "<person><name>foo</name><age>1999</age></person>", res.Body.String())
+
+	res = httptest.NewRecorder()
+
+	ctx.reset(nil, res)
+
+	httpErr := ctx.XML(http.StatusCreated, make(chan bool)).(*errors.HTTPError)
+
+	assert.Error(t, httpErr)
+	assert.Error(t, httpErr.Err)
+	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
+}
+
+func TestContextXMLIndent(t *testing.T) {
+	ctx := newContext(New())
+
+	res := httptest.NewRecorder()
+
+	ctx.reset(nil, res)
+
+	p := person{Name: "foo", Age: 1999}
+	err := ctx.XMLIndent(http.StatusCreated, &p, "    ")
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusCreated, res.Code)
+	assert.Equal(t, "application/xml", res.Header().Get("Content-Type"))
+	assert.Equal(t, "<person>\n    <name>foo</name>\n    <age>1999</age>\n</person>", res.Body.String())
+
+	res = httptest.NewRecorder()
+
+	ctx.reset(nil, res)
+
+	httpErr := ctx.XMLIndent(http.StatusCreated, make(chan bool), "    ").(*errors.HTTPError)
+
+	assert.Error(t, httpErr)
+	assert.Error(t, httpErr.Err)
+	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
+}
+
+func TestContextXMLByte(t *testing.T) {
+	ctx := newContext(New())
+
+	res := httptest.NewRecorder()
+
+	ctx.reset(nil, res)
+
+	p := person{Name: "foo", Age: 1999}
+
+	blob, err := xml.Marshal(p)
+	assert.NoError(t, err)
+
+	err = ctx.XMLByte(http.StatusOK, blob)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, res.Code)
+	assert.Equal(t, "application/xml", res.Header().Get("Content-Type"))
+	assert.Equal(t, "<person><name>foo</name><age>1999</age></person>", res.Body.String())
 }

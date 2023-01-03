@@ -18,6 +18,7 @@ func TestNew(t *testing.T) {
 	assert.Equal(t, newRouter(), k.router)
 	assert.Equal(t, 0, len(k.middlewares))
 	assert.Equal(t, serializer.NewJSONSerializer(), k.jsonSerializer)
+	assert.Equal(t, serializer.NewXMLSerializer(), k.xmlSerializer)
 	assert.True(t, funcsAreEqual(defaultErrorHandler, k.errorHandler))
 	assert.True(t, funcsAreEqual(defaultNotFoundHandler, k.notFoundHandler))
 	assert.True(t, funcsAreEqual(defaultMethodNotAllowedHandler, k.methodNotAllowedHandler))

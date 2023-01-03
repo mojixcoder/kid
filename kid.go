@@ -30,6 +30,7 @@ type (
 		methodNotAllowedHandler HandlerFunc
 		errorHandler            ErrorHandler
 		jsonSerializer          serializer.Serializer
+		xmlSerializer           serializer.Serializer
 		pool                    sync.Pool
 	}
 )
@@ -43,6 +44,7 @@ func New() *Kid {
 		methodNotAllowedHandler: defaultMethodNotAllowedHandler,
 		errorHandler:            defaultErrorHandler,
 		jsonSerializer:          serializer.NewJSONSerializer(),
+		xmlSerializer:           serializer.NewXMLSerializer(),
 	}
 
 	kid.pool.New = func() any {
