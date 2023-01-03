@@ -1,3 +1,5 @@
+// Package errors implements error interface.
+// HTTPError has first class support in Kid and is used for returning proper responses when an error happens.
 package errors
 
 import (

@@ -1,3 +1,4 @@
+// Package serializer implements JSON and XML serializers.
 package serializer
 
 import (
