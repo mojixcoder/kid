@@ -80,7 +80,7 @@ func (c *Context) QueryParams() url.Values {
 
 // JSON sends JSON response with the given status code.
 //
-// Returns an error happenedd during sending response.
+// Returns an error if an error happened during sending response otherwise returns nil.
 func (c *Context) JSON(code int, obj any) error {
 	c.writeContentType("application/json")
 	c.response.WriteHeader(code)
@@ -88,9 +88,9 @@ func (c *Context) JSON(code int, obj any) error {
 }
 
 // JSONIndent sends JSON response with the given status code.
-// Creates response with the given indent.
+// Sends response with the given indent.
 //
-// Returns an error happenedd during sending response.
+// Returns an error if an error happened during sending response otherwise returns nil.
 func (c *Context) JSONIndent(code int, obj any, indent string) error {
 	c.writeContentType("application/json")
 	c.response.WriteHeader(code)
@@ -112,12 +112,47 @@ func (c *Context) ReadJSON(out any) error {
 	return c.kid.jsonSerializer.Read(c.Request(), out)
 }
 
+// XML sends XML response with the given status code.
+//
+// Returns an error if an error happened during sending response otherwise returns nil.
+func (c *Context) XML(code int, obj any) error {
+	c.writeContentType("application/xml")
+	c.response.WriteHeader(code)
+	return c.kid.xmlSerializer.Write(c.Response(), obj, "")
+}
+
+// XMLIndent sends XML response with the given status code.
+// Sends response with the given indent.
+//
+// Returns an error if an error happened during sending response otherwise returns nil.
+func (c *Context) XMLIndent(code int, obj any, indent string) error {
+	c.writeContentType("application/xml")
+	c.response.WriteHeader(code)
+	return c.kid.xmlSerializer.Write(c.Response(), obj, indent)
+}
+
+// XMLByte sends XML response with the given status code.
+// Writes JSON blob untouched to response.
+func (c *Context) XMLByte(code int, blob []byte) error {
+	c.writeContentType("application/xml")
+	c.response.WriteHeader(code)
+	_, err := c.Response().Write(blob)
+	return err
+}
+
+// ReadXML reads request's body as XML and stores it in the given object.
+// The object must be a pointer.
+func (c *Context) ReadXML(out any) error {
+	return c.kid.xmlSerializer.Read(c.Request(), out)
+}
+
 // NoContent returns an empty response with the given status code.
 func (c *Context) NoContent(code int) {
 	c.response.WriteHeader(code)
 }
 
-// writeContentType sets content type of response.
+// writeContentType sets content type header for response.
+// It won't overwrite content type if it's already set.
 func (c *Context) writeContentType(contentType string) {
 	contentTypeHeader := "Content-Type"
 	header := c.response.Header()
