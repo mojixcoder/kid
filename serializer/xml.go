@@ -1,3 +1,4 @@
+// XML serializer
 package serializer
 
 import (
@@ -5,6 +6,7 @@ import (
 	"net/http"
 )
 
+// defaultXMLSerializer is the default XML serializer used in Kid.
 type defaultXMLSerializer struct {
 }
 
