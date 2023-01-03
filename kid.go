@@ -3,6 +3,8 @@ package kid
 import (
 	"net/http"
 	"sync"
+
+	"github.com/mojixcoder/kid/serializer"
 )
 
 type (
@@ -27,7 +29,7 @@ type (
 		notFoundHandler         HandlerFunc
 		methodNotAllowedHandler HandlerFunc
 		errorHandler            ErrorHandler
-		jsonSerializer          JSONSerializer
+		jsonSerializer          serializer.Serializer
 		pool                    sync.Pool
 	}
 )
@@ -40,7 +42,7 @@ func New() *Kid {
 		notFoundHandler:         defaultNotFoundHandler,
 		methodNotAllowedHandler: defaultMethodNotAllowedHandler,
 		errorHandler:            defaultErrorHandler,
-		jsonSerializer:          defaultJSONSerializer{},
+		jsonSerializer:          serializer.NewJSONSerializer(),
 	}
 
 	kid.pool.New = func() any {

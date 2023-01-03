@@ -1,4 +1,4 @@
-package kid
+package serializer
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mojixcoder/kid/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,39 +16,38 @@ type person struct {
 	Age  int    `json:"age" xml:"age"`
 }
 
-func TestDefaultJSONSerializerWrite(t *testing.T) {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	res := httptest.NewRecorder()
-	c := newContext(New())
-	c.reset(req, res)
+func TestNewJSONSerializer(t *testing.T) {
+	serializer := NewJSONSerializer()
 
+	assert.NotNil(t, serializer)
+	assert.IsType(t, defaultJSONSerializer{}, serializer)
+}
+
+func TestDefaultJSONSerializerWrite(t *testing.T) {
 	serializer := defaultJSONSerializer{}
 
+	res := httptest.NewRecorder()
 	p := person{Name: "Mojix", Age: 22}
 
-	err := serializer.Write(c, p, "")
+	err := serializer.Write(res, p, "")
 	assert.NoError(t, err)
 
 	assert.Equal(t, "{\"name\":\"Mojix\",\"age\":22}\n", res.Body.String())
 
-	req = httptest.NewRequest(http.MethodGet, "/", nil)
 	res = httptest.NewRecorder()
-	c.reset(req, res)
 
-	err = serializer.Write(c, p, "    ")
+	err = serializer.Write(res, p, "    ")
 	assert.NoError(t, err)
 
 	assert.Equal(t, "{\n    \"name\": \"Mojix\",\n    \"age\": 22\n}\n", res.Body.String())
 
-	req = httptest.NewRequest(http.MethodGet, "/", nil)
 	res = httptest.NewRecorder()
-	c.reset(req, res)
 
 	// Channel type cannot be converted to JSON.
-	err = serializer.Write(c, make(chan bool), "")
+	err = serializer.Write(res, make(chan bool), "")
 	assert.Error(t, err)
 
-	httpErr := err.(*HTTPError)
+	httpErr := err.(*errors.HTTPError)
 
 	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
 	assert.Equal(t, httpErr.Err.Error(), httpErr.Message)
@@ -56,29 +56,24 @@ func TestDefaultJSONSerializerWrite(t *testing.T) {
 
 func TestDefaultJSONSerializerRead(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader("{\"name\":\"Mojix\",\"age\":22}"))
-	res := httptest.NewRecorder()
-	c := newContext(New())
-	c.reset(req, res)
 
 	serializer := defaultJSONSerializer{}
 
 	var p person
-	err := serializer.Read(c, &p)
+	err := serializer.Read(req, &p)
 
 	assert.NoError(t, err)
 	assert.Equal(t, "Mojix", p.Name)
 	assert.Equal(t, 22, p.Age)
 
 	req = httptest.NewRequest(http.MethodGet, "/", strings.NewReader("{\"name\":\"Mojix\",\"age\":22}"))
-	res = httptest.NewRecorder()
-	c.reset(req, res)
 
 	// Invalid argument passed to unmarshal.
 	var p2 person
-	err = serializer.Read(c, p2)
+	err = serializer.Read(req, p2)
 	assert.Error(t, err)
 
-	httpErr := err.(*HTTPError)
+	httpErr := err.(*errors.HTTPError)
 	_, ok := httpErr.Err.(*json.InvalidUnmarshalError)
 
 	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
@@ -87,12 +82,10 @@ func TestDefaultJSONSerializerRead(t *testing.T) {
 	assert.True(t, ok)
 
 	req = httptest.NewRequest(http.MethodGet, "/", strings.NewReader("{\"name\":\"Mojix\",\"age\":22.5}"))
-	res = httptest.NewRecorder()
-	c.reset(req, res)
 
-	err = serializer.Read(c, &p2)
+	err = serializer.Read(req, &p2)
 
 	assert.Error(t, err)
-	assert.Error(t, err.(*HTTPError).Err)
-	assert.Equal(t, http.StatusBadRequest, err.(*HTTPError).Code)
+	assert.Error(t, err.(*errors.HTTPError).Err)
+	assert.Equal(t, http.StatusBadRequest, err.(*errors.HTTPError).Code)
 }

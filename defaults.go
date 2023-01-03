@@ -1,13 +1,17 @@
 package kid
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/mojixcoder/kid/errors"
+)
 
 var (
 	// defaultNotFoundHandler is Kid's default not found handler.
 	//
 	// It will be used when request doesn't match any routes.
 	defaultNotFoundHandler HandlerFunc = func(c *Context) error {
-		err := NewHTTPError(http.StatusNotFound)
+		err := errors.NewHTTPError(http.StatusNotFound)
 		return err
 	}
 
@@ -15,7 +19,7 @@ var (
 	//
 	// It will be used when request matches a route but its method doesn't match route's method.
 	defaultMethodNotAllowedHandler HandlerFunc = func(c *Context) error {
-		err := NewHTTPError(http.StatusMethodNotAllowed)
+		err := errors.NewHTTPError(http.StatusMethodNotAllowed)
 		return err
 	}
 
@@ -24,9 +28,9 @@ var (
 	// It will be used when handlers return an error.
 	// It can send proper responses when an HTTP error is returned.
 	defaultErrorHandler ErrorHandler = func(c *Context, err error) {
-		httpErr, ok := err.(*HTTPError)
+		httpErr, ok := err.(*errors.HTTPError)
 		if !ok {
-			httpErr = NewHTTPError(http.StatusInternalServerError)
+			httpErr = errors.NewHTTPError(http.StatusInternalServerError)
 		}
 
 		if c.Request().Method == http.MethodHead {
