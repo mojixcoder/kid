@@ -1,4 +1,3 @@
-// JSON serializer
 package serializer
 
 import (

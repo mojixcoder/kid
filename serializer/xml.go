@@ -1,4 +1,3 @@
-// XML serializer
 package serializer
 
 import (
