@@ -8,8 +8,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mojixcoder/kid/errors"
 	"github.com/stretchr/testify/assert"
 )
+
+type person struct {
+	Name string `json:"name" xml:"name"`
+	Age  int    `json:"age" xml:"age"`
+}
 
 func TestNewContext(t *testing.T) {
 	k := New()
@@ -223,7 +229,7 @@ func TestContextReadJSON(t *testing.T) {
 	ctx.reset(req, res)
 
 	var p2 person
-	httpErr := ctx.ReadJSON(&p2).(*HTTPError)
+	httpErr := ctx.ReadJSON(&p2).(*errors.HTTPError)
 
 	assert.Error(t, httpErr)
 	assert.Error(t, httpErr.Err)
@@ -248,7 +254,7 @@ func TestContextJSON(t *testing.T) {
 
 	ctx.reset(nil, res)
 
-	httpErr := ctx.JSON(http.StatusCreated, make(chan bool)).(*HTTPError)
+	httpErr := ctx.JSON(http.StatusCreated, make(chan bool)).(*errors.HTTPError)
 
 	assert.Error(t, httpErr)
 	assert.Error(t, httpErr.Err)
@@ -273,7 +279,7 @@ func TestContextJSONIndent(t *testing.T) {
 
 	ctx.reset(nil, res)
 
-	httpErr := ctx.JSONIndent(http.StatusCreated, make(chan bool), "    ").(*HTTPError)
+	httpErr := ctx.JSONIndent(http.StatusCreated, make(chan bool), "    ").(*errors.HTTPError)
 
 	assert.Error(t, httpErr)
 	assert.Error(t, httpErr.Err)

@@ -1,4 +1,4 @@
-package kid
+package errors
 
 import (
 	"fmt"

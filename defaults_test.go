@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	kiderrors "github.com/mojixcoder/kid/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +18,7 @@ func setupKid() *Kid {
 	})
 
 	k.GET("/http-error", func(c *Context) error {
-		return NewHTTPError(http.StatusBadRequest)
+		return kiderrors.NewHTTPError(http.StatusBadRequest)
 	})
 
 	k.GET("/error", func(c *Context) error {
@@ -25,7 +26,7 @@ func setupKid() *Kid {
 	})
 
 	k.HEAD("/error-head", func(c *Context) error {
-		return NewHTTPError(http.StatusBadRequest)
+		return kiderrors.NewHTTPError(http.StatusBadRequest)
 	})
 
 	return k

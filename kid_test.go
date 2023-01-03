@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/mojixcoder/kid/errors"
+	"github.com/mojixcoder/kid/serializer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +17,7 @@ func TestNew(t *testing.T) {
 	assert.NotNil(t, k)
 	assert.Equal(t, newRouter(), k.router)
 	assert.Equal(t, 0, len(k.middlewares))
-	assert.Equal(t, defaultJSONSerializer{}, k.jsonSerializer)
+	assert.Equal(t, serializer.NewJSONSerializer(), k.jsonSerializer)
 	assert.True(t, funcsAreEqual(defaultErrorHandler, k.errorHandler))
 	assert.True(t, funcsAreEqual(defaultNotFoundHandler, k.notFoundHandler))
 	assert.True(t, funcsAreEqual(defaultMethodNotAllowedHandler, k.methodNotAllowedHandler))
@@ -438,7 +440,7 @@ func TestKidServeHTTP_ErrorReturnedByHandler(t *testing.T) {
 	k := New()
 
 	k.GET("/test", func(c *Context) error {
-		return NewHTTPError(http.StatusForbidden)
+		return errors.NewHTTPError(http.StatusForbidden)
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)

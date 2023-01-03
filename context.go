@@ -84,7 +84,7 @@ func (c *Context) QueryParams() url.Values {
 func (c *Context) JSON(code int, obj any) error {
 	c.writeContentType("application/json")
 	c.response.WriteHeader(code)
-	return c.kid.jsonSerializer.Write(c, obj, "")
+	return c.kid.jsonSerializer.Write(c.Response(), obj, "")
 }
 
 // JSONIndent sends JSON response with the given status code.
@@ -94,7 +94,7 @@ func (c *Context) JSON(code int, obj any) error {
 func (c *Context) JSONIndent(code int, obj any, indent string) error {
 	c.writeContentType("application/json")
 	c.response.WriteHeader(code)
-	return c.kid.jsonSerializer.Write(c, obj, indent)
+	return c.kid.jsonSerializer.Write(c.Response(), obj, indent)
 }
 
 // JSONByte sends JSON response with the given status code.
@@ -109,7 +109,7 @@ func (c *Context) JSONByte(code int, blob []byte) error {
 // ReadJSON reads request's body as JSON and stores it in the given object.
 // The object must be a pointer.
 func (c *Context) ReadJSON(out any) error {
-	return c.kid.jsonSerializer.Read(c, out)
+	return c.kid.jsonSerializer.Read(c.Request(), out)
 }
 
 // NoContent returns an empty response with the given status code.
