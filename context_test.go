@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/mojixcoder/kid/errors"
+	htmlrenderer "github.com/mojixcoder/kid/html_renderer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -404,4 +405,38 @@ func TestContextXMLByte(t *testing.T) {
 	assert.Equal(t, http.StatusOK, res.Code)
 	assert.Equal(t, "application/xml", res.Header().Get("Content-Type"))
 	assert.Equal(t, "<person><name>foo</name><age>1999</age></person>", res.Body.String())
+}
+
+func TestContextHTML(t *testing.T) {
+	k := New()
+	renderer := htmlrenderer.New("testdata/templates/", "layouts/", ".html", false)
+	renderer.AddFunc("greet", func() int { return 1 })
+	k.htmlRenderer = renderer
+
+	ctx := newContext(k)
+
+	res := httptest.NewRecorder()
+	ctx.reset(nil, res)
+
+	err := ctx.HTML(http.StatusAccepted, "index.html", nil)
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusAccepted, res.Code)
+	assert.Equal(t, "\n<html><body>\n<p>content</p>\n</body></html>\n", res.Body.String())
+	assert.Equal(t, "text/html", res.Header().Get("Content-Type"))
+}
+
+func TestContextHTMLString(t *testing.T) {
+	ctx := newContext(New())
+
+	res := httptest.NewRecorder()
+	ctx.reset(nil, res)
+
+	err := ctx.HTMLString(http.StatusAccepted, "<p>Hello</p>")
+
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusAccepted, res.Code)
+	assert.Equal(t, "<p>Hello</p>", res.Body.String())
+	assert.Equal(t, "text/html", res.Header().Get("Content-Type"))
+
 }
