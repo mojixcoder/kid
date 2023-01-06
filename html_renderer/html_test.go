@@ -6,12 +6,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/mojixcoder/kid"
 	"github.com/mojixcoder/kid/errors"
 	"github.com/stretchr/testify/assert"
 )
 
-func newTestHTMLRenderer() defaultHTMLRenderer {
+func newTestHTMLRenderer() *defaultHTMLRenderer {
 	htmlRenderer := New("../testdata/templates/", "layouts/", ".html", false)
 	return htmlRenderer
 }
@@ -171,7 +170,7 @@ func TestDefaultHTMLRendererRenderHTML(t *testing.T) {
 	assert.Equal(t, "\n<html><body>\n<p>content</p>\n</body></html>\n", res.Body.String())
 
 	res = httptest.NewRecorder()
-	err = htmlRenderer.RenderHTML(res, "pages/page.html", kid.Map{"key": "page contents"})
+	err = htmlRenderer.RenderHTML(res, "pages/page.html", map[string]string{"key": "page contents"})
 	assert.NoError(t, err)
 	assert.Equal(t, "\n<html><body>\n<p>page contents</p>\n</body></html>\n", res.Body.String())
 

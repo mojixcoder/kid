@@ -37,8 +37,11 @@ type defaultHTMLRenderer struct {
 	isInitialized bool
 }
 
+// Verifying interface compliance.
+var _ HTMLRenderer = (*defaultHTMLRenderer)(nil)
+
 // New returns a new HTML renderer.
-func New(templatesDir, layoutsDir, extension string, debug bool) defaultHTMLRenderer {
+func New(templatesDir, layoutsDir, extension string, debug bool) *defaultHTMLRenderer {
 	htmlRenderer := defaultHTMLRenderer{
 		rootDir:   templatesDir,
 		layoutDir: layoutsDir,
@@ -47,11 +50,11 @@ func New(templatesDir, layoutsDir, extension string, debug bool) defaultHTMLRend
 		templates: make(map[string]*template.Template),
 		funcMap:   make(template.FuncMap),
 	}
-	return htmlRenderer
+	return &htmlRenderer
 }
 
 // Default returns a new default HTML renderer.
-func Default(debug bool) defaultHTMLRenderer {
+func Default(debug bool) *defaultHTMLRenderer {
 	return New(
 		DefaultRootDir,
 		DefaultLayoutsDir,
