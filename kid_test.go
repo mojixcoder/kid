@@ -2,9 +2,11 @@ package kid
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/mojixcoder/kid/errors"
 	"github.com/mojixcoder/kid/serializer"
@@ -462,4 +464,30 @@ func TestKidDebug(t *testing.T) {
 
 	k.debug = true
 	assert.True(t, k.Debug())
+}
+
+func TestKidRun(t *testing.T) {
+	k := New()
+
+	k.GET("/", func(c *Context) error {
+		return c.JSON(http.StatusOK, Map{"message": "healthy"})
+	})
+
+	go func() {
+		assert.NoError(t, k.Run())
+	}()
+
+	// Wait for the server to start
+	time.Sleep(5 * time.Millisecond)
+
+	resp, err := http.Get("http://localhost:2376")
+	assert.NoError(t, err)
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+	assert.Equal(t, "{\"message\":\"healthy\"}\n", string(body))
 }

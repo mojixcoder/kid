@@ -63,7 +63,6 @@ func New() *Kid {
 // Specifying an address is optional. Default address is :2376.
 func (k *Kid) Run(address ...string) error {
 	addr := resolveAddress(address)
-
 	return http.ListenAndServe(addr, k)
 }
 
