@@ -8,4 +8,5 @@ engines:
 exclude_paths:
   - "examples/**"
   - ".github/**"
+  - "testdata/**"
   - "**.md"
