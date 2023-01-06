@@ -453,3 +453,13 @@ func TestKidServeHTTP_ErrorReturnedByHandler(t *testing.T) {
 	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	assert.Equal(t, "{\"message\":\"Forbidden\"}\n", res.Body.String())
 }
+
+func TestKidDebug(t *testing.T) {
+	k := New()
+	k.debug = false
+
+	assert.False(t, k.Debug())
+
+	k.debug = true
+	assert.True(t, k.Debug())
+}
