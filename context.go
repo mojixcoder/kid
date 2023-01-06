@@ -146,6 +146,28 @@ func (c *Context) ReadXML(out any) error {
 	return c.kid.xmlSerializer.Read(c.Request(), out)
 }
 
+// HTML sends HTML response with the given status code.
+//
+// tpl must be a relative path to templates root directory.
+// Defaults to "templates/".
+//
+// Returns an error if an error happened during sending response otherwise returns nil.
+func (c *Context) HTML(code int, tpl string, data any) error {
+	c.writeContentType("text/html")
+	c.response.WriteHeader(code)
+	return c.kid.htmlRenderer.RenderHTML(c.Response(), tpl, data)
+}
+
+// HTMLString sends bare string as HTML response with the given status code.
+//
+// Returns an error if an error happened during sending response otherwise returns nil.
+func (c *Context) HTMLString(code int, tpl string) error {
+	c.writeContentType("text/html")
+	c.response.WriteHeader(code)
+	_, err := c.Response().Write([]byte(tpl))
+	return err
+}
+
 // NoContent returns an empty response with the given status code.
 func (c *Context) NoContent(code int) {
 	c.response.WriteHeader(code)

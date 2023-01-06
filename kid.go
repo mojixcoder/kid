@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sync"
 
+	htmlrenderer "github.com/mojixcoder/kid/html_renderer"
 	"github.com/mojixcoder/kid/serializer"
 )
 
@@ -31,6 +32,8 @@ type (
 		errorHandler            ErrorHandler
 		jsonSerializer          serializer.Serializer
 		xmlSerializer           serializer.Serializer
+		htmlRenderer            htmlrenderer.HTMLRenderer
+		debug                   bool
 		pool                    sync.Pool
 	}
 )
@@ -45,6 +48,7 @@ func New() *Kid {
 		errorHandler:            defaultErrorHandler,
 		jsonSerializer:          serializer.NewJSONSerializer(),
 		xmlSerializer:           serializer.NewXMLSerializer(),
+		htmlRenderer:            htmlrenderer.Default(false),
 	}
 
 	kid.pool.New = func() any {
@@ -180,6 +184,11 @@ func (k *Kid) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	k.pool.Put(c)
+}
+
+// Debug returns whether we are in debug mode or not.
+func (k *Kid) Debug() bool {
+	return k.debug
 }
 
 // applyMiddlewaresToHandler applies middlewares to the handler and returns the handler.
