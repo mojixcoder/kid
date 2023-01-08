@@ -128,8 +128,6 @@ func (r *defaultHTMLRenderer) loadTemplates() error {
 		return newInternalServerHTTPError(err, err.Error())
 	}
 
-	fmt.Println(r.funcMap)
-
 	for _, templateFile := range templateFiles {
 		name := r.getTemplateName(templateFile)
 		files := getFilesToParse(templateFile, layoutFiles)
