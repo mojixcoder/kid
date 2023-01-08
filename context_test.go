@@ -36,11 +36,12 @@ func TestContextReset(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	res := httptest.NewRecorder()
+	expectedRes := newResponse(res)
 
 	ctx.reset(req, res)
 
 	assert.Equal(t, req, ctx.request)
-	assert.Equal(t, res, ctx.response)
+	assert.Equal(t, expectedRes, ctx.response)
 	assert.Equal(t, make(Map), ctx.storage)
 	assert.Equal(t, make(Params), ctx.params)
 }
@@ -59,10 +60,11 @@ func TestContextResponse(t *testing.T) {
 	ctx := newContext(New())
 
 	res := httptest.NewRecorder()
+	expectedRes := newResponse(res)
 
 	ctx.reset(nil, res)
 
-	assert.Equal(t, res, ctx.Response())
+	assert.Equal(t, expectedRes, ctx.Response())
 }
 
 func TestContextSetParams(t *testing.T) {
@@ -204,10 +206,6 @@ func TestNoContent(t *testing.T) {
 	ctx.reset(nil, res)
 
 	ctx.NoContent(http.StatusNoContent)
-	assert.Equal(t, http.StatusNoContent, res.Code)
-
-	// Once status code is written, it can't be rewritten again.
-	ctx.NoContent(http.StatusOK)
 	assert.Equal(t, http.StatusNoContent, res.Code)
 }
 

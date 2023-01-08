@@ -474,13 +474,13 @@ func TestKidRun(t *testing.T) {
 	})
 
 	go func() {
-		assert.NoError(t, k.Run())
+		assert.NoError(t, k.Run(":8080"))
 	}()
 
 	// Wait for the server to start
 	time.Sleep(5 * time.Millisecond)
 
-	resp, err := http.Get("http://localhost:2376")
+	resp, err := http.Get("http://localhost:8080")
 	assert.NoError(t, err)
 
 	defer resp.Body.Close()

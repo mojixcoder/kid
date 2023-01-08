@@ -10,7 +10,7 @@ import (
 // It holds data related to current HTTP request.
 type Context struct {
 	request  *http.Request
-	response http.ResponseWriter
+	response ResponseWriter
 	params   Params
 	storage  Map
 	kid      *Kid
@@ -26,7 +26,7 @@ func newContext(k *Kid) *Context {
 // reset resets the context.
 func (c *Context) reset(request *http.Request, response http.ResponseWriter) {
 	c.request = request
-	c.response = response
+	c.response = newResponse(response)
 	c.storage = make(Map)
 	c.params = make(Params)
 }
@@ -42,7 +42,7 @@ func (c *Context) Request() *http.Request {
 }
 
 // Response returns plain response of current HTTP request.
-func (c *Context) Response() http.ResponseWriter {
+func (c *Context) Response() ResponseWriter {
 	return c.response
 }
 
@@ -171,6 +171,7 @@ func (c *Context) HTMLString(code int, tpl string) error {
 // NoContent returns an empty response with the given status code.
 func (c *Context) NoContent(code int) {
 	c.response.WriteHeader(code)
+	c.response.WriteHeaderNow()
 }
 
 // writeContentType sets content type header for response.
