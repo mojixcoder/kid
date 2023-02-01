@@ -196,7 +196,7 @@ func (router *Router) find(path string, method string) (Route, Params, error) {
 }
 
 // isPlus returns true if path parameter is plus path parameter.
-func (r *Router) isPlus(segment string) bool {
+func (router *Router) isPlus(segment string) bool {
 	var isPlus bool
 	if strings.HasPrefix(segment, plusParamPrefix) {
 		isPlus = true
