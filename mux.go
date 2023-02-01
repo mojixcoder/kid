@@ -12,6 +12,14 @@ var (
 	errMethodNotAllowed = errors.New("method is not allowed")
 )
 
+// Path parameters prefix and suffix.
+const (
+	paramPrefix     = "{"
+	paramSuffix     = "}"
+	plusParamPrefix = paramPrefix + "+"
+	starParamPrefix = paramPrefix + "*"
+)
+
 type (
 	// Router is the struct which holds all of the routes.
 	Router struct {
@@ -30,6 +38,7 @@ type (
 	Segment struct {
 		isParam bool
 		isPlus  bool
+		isStar  bool
 		tpl     string
 	}
 
@@ -59,17 +68,26 @@ func (router *Router) add(path string, handler HandlerFunc, methods []string, mi
 	routeSegments := make([]Segment, 0, len(segments))
 
 	for i, segment := range segments {
-		if strings.HasPrefix(segment, "{+") && strings.HasSuffix(segment, "}") {
+		if (strings.HasPrefix(segment, plusParamPrefix) || strings.HasPrefix(segment, starParamPrefix)) && strings.HasSuffix(segment, paramSuffix) {
+			isPlus := router.isPlus(segment)
+			isStar := !isPlus
+
 			if i == len(segments)-1 {
-				routeSegments = append(routeSegments, Segment{isParam: true, isPlus: true, tpl: segment[2 : len(segment)-1]})
+				routeSegments = append(
+					routeSegments,
+					Segment{isParam: true, isPlus: isPlus, isStar: isStar, tpl: segment[2 : len(segment)-1]},
+				)
 			} else if i == len(segments)-2 {
 				if segments[i+1] != "" {
-					panic("plus path parameters can only be the last part of a path")
+					panic("plus/star path parameters can only be the last part of a path")
 				}
-				routeSegments = append(routeSegments, Segment{isParam: true, isPlus: true, tpl: segment[2 : len(segment)-1]})
+				routeSegments = append(
+					routeSegments,
+					Segment{isParam: true, isPlus: isPlus, isStar: isStar, tpl: segment[2 : len(segment)-1]},
+				)
 				break
 			} else {
-				panic("plus path parameters can only be the last part of a path")
+				panic("plus/star path parameters can only be the last part of a path")
 			}
 		} else if strings.HasPrefix(segment, "{") && strings.HasSuffix(segment, "}") {
 			routeSegments = append(routeSegments, Segment{isParam: true, tpl: segment[1 : len(segment)-1]})
@@ -84,6 +102,7 @@ func (router *Router) add(path string, handler HandlerFunc, methods []string, mi
 // match determines if the given path and method matches the route.
 func (route *Route) match(path, method string) (Params, error) {
 	params := make(Params)
+	totalSegments := len(route.segments)
 	var end bool
 
 	for segmentIndex, segment := range route.segments {
@@ -96,14 +115,21 @@ func (route *Route) match(path, method string) (Params, error) {
 			end = true
 
 			// No slashes are left but there are still more segments.
-			if segmentIndex != len(route.segments)-1 {
-				return nil, errNotFound
+			if segmentIndex != totalSegments-1 {
+				// It means /api/v1 will be matched to /api/v1/{*param}
+				lastSegment := route.segments[totalSegments-1]
+				if segmentIndex == totalSegments-2 && lastSegment.isStar {
+					end = true
+					params[lastSegment.tpl] = ""
+				} else {
+					return nil, errNotFound
+				}
 			}
 		}
 
 		if segment.isParam {
-			if segment.isPlus {
-				if len(path) == 0 {
+			if segment.isPlus || segment.isStar {
+				if len(path) == 0 && segment.isPlus {
 					return nil, errNotFound
 				}
 
@@ -167,6 +193,15 @@ func (router *Router) find(path string, method string) (Route, Params, error) {
 
 	return Route{}, nil, returnedErr
 
+}
+
+// isPlus returns true if path parameter is plus path parameter.
+func (router *Router) isPlus(segment string) bool {
+	var isPlus bool
+	if strings.HasPrefix(segment, plusParamPrefix) {
+		isPlus = true
+	}
+	return isPlus
 }
 
 // cleanPath normalizes the path.
