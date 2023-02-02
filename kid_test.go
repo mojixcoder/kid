@@ -491,3 +491,95 @@ func TestKidRun(t *testing.T) {
 	assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
 	assert.Equal(t, "{\"message\":\"healthy\"}\n", string(body))
 }
+
+func TestKidStatic(t *testing.T) {
+	k := New()
+
+	k.Static("/static/", "testdata/static")
+
+	testCases := []struct {
+		name               string
+		req                *http.Request
+		res                *httptest.ResponseRecorder
+		expectedStatusCode int
+		expectedContent    string
+	}{
+		{
+			name:               "Serving main.html",
+			req:                httptest.NewRequest(http.MethodGet, "/static/main.html", nil),
+			res:                httptest.NewRecorder(),
+			expectedStatusCode: http.StatusOK,
+			expectedContent:    "main",
+		},
+		{
+			name:               "Serving page.html in pages directory",
+			req:                httptest.NewRequest(http.MethodGet, "/static/pages/page.html", nil),
+			res:                httptest.NewRecorder(),
+			expectedStatusCode: http.StatusOK,
+			expectedContent:    "page",
+		},
+		{
+			name:               "Serving pages/index.html",
+			req:                httptest.NewRequest(http.MethodGet, "/static/pages/", nil),
+			res:                httptest.NewRecorder(),
+			expectedStatusCode: http.StatusOK,
+			expectedContent:    "index",
+		},
+		{
+			name:               "Non-existent",
+			req:                httptest.NewRequest(http.MethodGet, "/static/doesn't-exist.html", nil),
+			res:                httptest.NewRecorder(),
+			expectedStatusCode: http.StatusNotFound,
+			expectedContent:    "404 page not found\n",
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			k.ServeHTTP(testCase.res, testCase.req)
+
+			assert.Equal(t, testCase.expectedStatusCode, testCase.res.Code)
+			assert.Equal(t, testCase.expectedContent, testCase.res.Body.String())
+		})
+	}
+
+}
+
+func TestKidStaticFS(t *testing.T) {
+	k := New()
+
+	k.StaticFS("/static/", http.Dir("testdata/static"))
+
+	testCases := []struct {
+		name               string
+		req                *http.Request
+		res                *httptest.ResponseRecorder
+		expectedStatusCode int
+		expectedContent    string
+	}{
+		{
+			name:               "Serving main.html",
+			req:                httptest.NewRequest(http.MethodGet, "/static/main.html", nil),
+			res:                httptest.NewRecorder(),
+			expectedStatusCode: http.StatusOK,
+			expectedContent:    "main",
+		},
+		{
+			name:               "Serving page.html in pages directory",
+			req:                httptest.NewRequest(http.MethodGet, "/static/pages/page.html", nil),
+			res:                httptest.NewRecorder(),
+			expectedStatusCode: http.StatusOK,
+			expectedContent:    "page",
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			k.ServeHTTP(testCase.res, testCase.req)
+
+			assert.Equal(t, testCase.expectedStatusCode, testCase.res.Code)
+			assert.Equal(t, testCase.expectedContent, testCase.res.Body.String())
+		})
+	}
+
+}
