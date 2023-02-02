@@ -38,12 +38,11 @@ func helloHandler(c *kid.Context) error {
 #### TODOs
 ___
 
-- [x] Add test cases up to +90% coverage
-- [ ] Complete docs
-- [ ] Add more methods for sending response like XML, HTML, etc.
+- [x] Add test cases up to +90% coverage.
+- [ ] Complete docs.
+- [x] Add more methods for sending response like XML, HTML, etc.
 - [ ] Add some middlewares like `Logger`, `Recovery`, etc.
-- [x] Add CI/CD
-- [x] Add comments
-- [ ] Add binders
-- [ ] Add validator
-- [ ] Re-implement router using radix tree
+- [x] Add CI.
+- [x] Add comments.
+- [x] Add methods to serve static files.
+- [ ] Add validator.
