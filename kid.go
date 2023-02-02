@@ -158,6 +158,30 @@ func (k *Kid) ADD(path string, handler HandlerFunc, methods []string, middleware
 	k.router.add(path, handler, methods, middlewares)
 }
 
+// Static registers a new route for serving static files.
+//
+// It uses http.Dir as its file system.
+func (k *Kid) Static(urlPath, staticRoot string, middlewares ...MiddlewareFunc) {
+	fileServer := newFileServer(urlPath, FS{http.Dir(staticRoot)})
+
+	methods := []string{http.MethodGet}
+	path := appendSlash(urlPath) + "{*filePath}"
+
+	k.router.add(path, WrapHandler(fileServer), methods, middlewares)
+}
+
+// StaticFS registers a new route for serving static files.
+//
+// It uses the given file system to serve static files.
+func (k *Kid) StaticFS(urlPath string, fs http.FileSystem, middlewares ...MiddlewareFunc) {
+	fileServer := newFileServer(urlPath, fs)
+
+	methods := []string{http.MethodGet}
+	path := appendSlash(urlPath) + "{*filePath}"
+
+	k.router.add(path, WrapHandler(fileServer), methods, middlewares)
+}
+
 // ServeHTTP implements the http.HandlerFunc interface.
 func (k *Kid) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := k.pool.Get().(*Context)
