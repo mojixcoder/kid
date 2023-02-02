@@ -162,12 +162,7 @@ func (k *Kid) ADD(path string, handler HandlerFunc, methods []string, middleware
 //
 // It uses http.Dir as its file system.
 func (k *Kid) Static(urlPath, staticRoot string, middlewares ...MiddlewareFunc) {
-	fileServer := newFileServer(urlPath, FS{http.Dir(staticRoot)})
-
-	methods := []string{http.MethodGet}
-	path := appendSlash(urlPath) + "{*filePath}"
-
-	k.router.add(path, WrapHandler(fileServer), methods, middlewares)
+	k.StaticFS(urlPath, FS{http.Dir(staticRoot)})
 }
 
 // StaticFS registers a new route for serving static files.
