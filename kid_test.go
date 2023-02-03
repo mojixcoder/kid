@@ -456,6 +456,22 @@ func TestKidServeHTTP_ErrorReturnedByHandler(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"Forbidden\"}\n", res.Body.String())
 }
 
+func TestKidServeHTTP_WriteStatusCodeIfNotWritten(t *testing.T) {
+	k := New()
+
+	k.GET("/test", func(c *Context) error {
+		c.Response().WriteHeader(http.StatusCreated)
+		return nil
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	res := httptest.NewRecorder()
+
+	k.ServeHTTP(res, req)
+
+	assert.Equal(t, http.StatusCreated, res.Code)
+}
+
 func TestKidDebug(t *testing.T) {
 	k := New()
 	k.debug = false

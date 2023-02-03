@@ -201,6 +201,10 @@ func (k *Kid) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		k.errorHandler(c, err)
 	}
 
+	if !c.Response().Written() {
+		c.Response().WriteHeaderNow()
+	}
+
 	k.pool.Put(c)
 }
 
