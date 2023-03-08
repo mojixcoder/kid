@@ -3,9 +3,11 @@ package kid
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -17,6 +19,13 @@ import (
 type person struct {
 	Name string `json:"name" xml:"name"`
 	Age  int    `json:"age" xml:"age"`
+}
+
+func getNewLineStr() string {
+	if filepath.Separator != rune('/') {
+		return "\r\n"
+	}
+	return "\n"
 }
 
 func TestNewContext(t *testing.T) {
@@ -418,9 +427,15 @@ func TestContextHTML(t *testing.T) {
 
 	err := ctx.HTML(http.StatusAccepted, "index.html", nil)
 
+	newLine := getNewLineStr()
+	expectedRes := fmt.Sprintf(
+		"%s<html><body>%s<p>content</p>%s</body></html>%s",
+		newLine, newLine, newLine, newLine,
+	)
+
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusAccepted, res.Code)
-	assert.Equal(t, "\n<html><body>\n<p>content</p>\n</body></html>\n", res.Body.String())
+	assert.Equal(t, expectedRes, res.Body.String())
 	assert.Equal(t, "text/html", res.Header().Get("Content-Type"))
 }
 

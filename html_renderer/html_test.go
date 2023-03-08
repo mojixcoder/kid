@@ -1,9 +1,11 @@
 package htmlrenderer
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"testing"
 
 	"github.com/mojixcoder/kid/errors"
@@ -13,6 +15,13 @@ import (
 func newTestHTMLRenderer() *defaultHTMLRenderer {
 	htmlRenderer := New("../testdata/templates/", "layouts/", ".html", false)
 	return htmlRenderer
+}
+
+func getNewLineStr() string {
+	if filepath.Separator != rune('/') {
+		return "\r\n"
+	}
+	return "\n"
 }
 
 func TestNew(t *testing.T) {
@@ -56,12 +65,16 @@ func TestDefaultHTMLRendererGetTemplateAndLayoutFiles(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(
 		t,
-		[]string{"../testdata/templates/layouts/base.html"},
+		[]string{filepath.Join("..", "testdata", "templates", "layouts", "base.html")},
 		layoutFiles,
 	)
 	assert.Equal(
 		t,
-		[]string{"../testdata/templates/index.html", "../testdata/templates/pages/page.html", "../testdata/templates/pages/page2.html"},
+		[]string{
+			filepath.Join("..", "testdata", "templates", "index.html"),
+			filepath.Join("..", "testdata", "templates", "pages", "page.html"),
+			filepath.Join("..", "testdata", "templates", "pages", "page2.html"),
+		},
 		templateFiles,
 	)
 
@@ -164,20 +177,32 @@ func TestDefaultHTMLRendererRenderHTML(t *testing.T) {
 	assert.Equal(t, "template doesn't_exists.html not found", httpErr.Message)
 	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
 
+	newline := getNewLineStr()
+
 	res = httptest.NewRecorder()
 	err = htmlRenderer.RenderHTML(res, "index.html", nil)
 	assert.NoError(t, err)
-	assert.Equal(t, "\n<html><body>\n<p>content</p>\n</body></html>\n", res.Body.String())
+	assert.Equal(
+		t,
+		fmt.Sprintf("%s<html><body>%s<p>content</p>%s</body></html>%s", newline, newline, newline, newline),
+		res.Body.String(),
+	)
 
 	res = httptest.NewRecorder()
 	err = htmlRenderer.RenderHTML(res, "pages/page.html", map[string]string{"key": "page contents"})
 	assert.NoError(t, err)
-	assert.Equal(t, "\n<html><body>\n<p>page contents</p>\n</body></html>\n", res.Body.String())
+	assert.Equal(t,
+		fmt.Sprintf("%s<html><body>%s<p>page contents</p>%s</body></html>%s", newline, newline, newline, newline),
+		res.Body.String(),
+	)
 
 	res = httptest.NewRecorder()
 	err = htmlRenderer.RenderHTML(res, "pages/page2.html", nil)
 	assert.NoError(t, err)
-	assert.Equal(t, "\n<html><body>\n<p>Hello Tom</p>\n</body></html>\n", res.Body.String())
+	assert.Equal(t,
+		fmt.Sprintf("%s<html><body>%s<p>Hello Tom</p>%s</body></html>%s", newline, newline, newline, newline),
+		res.Body.String(),
+	)
 }
 
 func TestNewInternalServerHTTPError(t *testing.T) {
