@@ -147,7 +147,7 @@ func (r *defaultHTMLRenderer) shouldntLoadTemplates() bool {
 
 // isLayout determines if the file is a layout file or not.
 func (r *defaultHTMLRenderer) isLayout(file string) bool {
-	return strings.HasPrefix(file, r.rootDir+r.layoutDir)
+	return strings.HasPrefix(filepath.ToSlash(file), filepath.ToSlash(r.rootDir+r.layoutDir))
 }
 
 // isValidExt determines if the file has valid extension.
@@ -157,7 +157,7 @@ func (r *defaultHTMLRenderer) isValidExt(file string) bool {
 
 // getTemplateName extracts template name from file path.
 func (r *defaultHTMLRenderer) getTemplateName(filePath string) string {
-	return filePath[len(r.rootDir):]
+	return filepath.ToSlash(filePath[len(r.rootDir):])
 }
 
 // getFilesToParse merges template path and layouts into a string slice.
