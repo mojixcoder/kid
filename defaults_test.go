@@ -13,19 +13,19 @@ import (
 func setupKid() *Kid {
 	k := New()
 
-	k.POST("/post", func(c *Context) error {
+	k.Post("/post", func(c *Context) error {
 		return c.JSON(http.StatusOK, Map{"method": c.Request().Method})
 	})
 
-	k.GET("/http-error", func(c *Context) error {
+	k.Get("/http-error", func(c *Context) error {
 		return kiderrors.NewHTTPError(http.StatusBadRequest)
 	})
 
-	k.GET("/error", func(c *Context) error {
+	k.Get("/error", func(c *Context) error {
 		return errors.New("something went wrong")
 	})
 
-	k.HEAD("/error-head", func(c *Context) error {
+	k.Head("/error-head", func(c *Context) error {
 		return kiderrors.NewHTTPError(http.StatusBadRequest)
 	})
 

@@ -25,7 +25,7 @@ import (
 func main() {
     k := kid.New()
 
-    k.GET("/hello", helloHandler)
+    k.Get("/hello", helloHandler)
 
     k.Run()
 }
