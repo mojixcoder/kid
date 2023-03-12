@@ -23,7 +23,7 @@ func TestNewJSONSerializer(t *testing.T) {
 	assert.IsType(t, defaultJSONSerializer{}, serializer)
 }
 
-func TestDefaultJSONSerializerWrite(t *testing.T) {
+func TestDefaultJSONSerializer_Write(t *testing.T) {
 	serializer := defaultJSONSerializer{}
 
 	res := httptest.NewRecorder()
@@ -54,7 +54,7 @@ func TestDefaultJSONSerializerWrite(t *testing.T) {
 	assert.Error(t, httpErr.Err)
 }
 
-func TestDefaultJSONSerializerRead(t *testing.T) {
+func TestDefaultJSONSerializer_Read(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader("{\"name\":\"Mojix\",\"age\":22}"))
 
 	serializer := defaultJSONSerializer{}

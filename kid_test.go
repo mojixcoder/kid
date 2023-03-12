@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 	"time"
 
@@ -26,7 +27,7 @@ func TestNew(t *testing.T) {
 	assert.True(t, funcsAreEqual(defaultMethodNotAllowedHandler, k.methodNotAllowedHandler))
 }
 
-func TestKidUse(t *testing.T) {
+func TestKid_Use(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "middleware cannot be nil", func() {
@@ -40,7 +41,7 @@ func TestKidUse(t *testing.T) {
 	assert.Equal(t, 1, len(k.middlewares))
 }
 
-func TestKidGet(t *testing.T) {
+func TestKid_Get(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
@@ -79,7 +80,7 @@ func TestKidGet(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"Hello human\"}\n", res.Body.String())
 }
 
-func TestKidPost(t *testing.T) {
+func TestKid_Post(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
@@ -105,7 +106,7 @@ func TestKidPost(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"ok\"}\n", res.Body.String())
 }
 
-func TestKidPut(t *testing.T) {
+func TestKid_Put(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
@@ -131,7 +132,7 @@ func TestKidPut(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"put\"}\n", res.Body.String())
 }
 
-func TestKidDelete(t *testing.T) {
+func TestKid_Delete(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
@@ -157,7 +158,7 @@ func TestKidDelete(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"deleted\"}\n", res.Body.String())
 }
 
-func TestKidPatch(t *testing.T) {
+func TestKid_Patch(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
@@ -183,7 +184,7 @@ func TestKidPatch(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"patch\"}\n", res.Body.String())
 }
 
-func TestKidTrace(t *testing.T) {
+func TestKid_Trace(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
@@ -209,7 +210,7 @@ func TestKidTrace(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"trace\"}\n", res.Body.String())
 }
 
-func TestKidConnect(t *testing.T) {
+func TestKid_Connect(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
@@ -235,7 +236,7 @@ func TestKidConnect(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"connect\"}\n", res.Body.String())
 }
 
-func TestKidOptions(t *testing.T) {
+func TestKid_Options(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
@@ -261,7 +262,7 @@ func TestKidOptions(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"options\"}\n", res.Body.String())
 }
 
-func TestKidHead(t *testing.T) {
+func TestKid_Head(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
@@ -287,7 +288,7 @@ func TestKidHead(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"head\"}\n", res.Body.String())
 }
 
-func TestKidAdd(t *testing.T) {
+func TestKid_Add(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
@@ -323,7 +324,7 @@ func TestKidAdd(t *testing.T) {
 	}
 }
 
-func TestKidAny(t *testing.T) {
+func TestKid_Any(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
@@ -373,7 +374,7 @@ func TestKidAny(t *testing.T) {
 	}
 }
 
-func TestApplyMiddlewaresToHandler(t *testing.T) {
+func TestKid_applyMiddlewaresToHandler(t *testing.T) {
 	k := New()
 
 	middlewares := []MiddlewareFunc{
@@ -411,7 +412,7 @@ func TestApplyMiddlewaresToHandler(t *testing.T) {
 	assert.Equal(t, "{\"key1\":10,\"key2\":20}\n", res.Body.String())
 }
 
-func TestKidServeHTTP_NotFound(t *testing.T) {
+func TestKid_ServeHTTP_NotFound(t *testing.T) {
 	k := New()
 
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -424,7 +425,7 @@ func TestKidServeHTTP_NotFound(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"Not Found\"}\n", res.Body.String())
 }
 
-func TestKidServeHTTP_MethodnotAllowed(t *testing.T) {
+func TestKid_ServeHTTP_MethodnotAllowed(t *testing.T) {
 	k := New()
 
 	k.Get("/test", testHandlerFunc)
@@ -439,7 +440,7 @@ func TestKidServeHTTP_MethodnotAllowed(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"Method Not Allowed\"}\n", res.Body.String())
 }
 
-func TestKidServeHTTP_ErrorReturnedByHandler(t *testing.T) {
+func TestKid_ServeHTTP_ErrorReturnedByHandler(t *testing.T) {
 	k := New()
 
 	k.Get("/test", func(c *Context) error {
@@ -456,7 +457,7 @@ func TestKidServeHTTP_ErrorReturnedByHandler(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"Forbidden\"}\n", res.Body.String())
 }
 
-func TestKidServeHTTP_WriteStatusCodeIfNotWritten(t *testing.T) {
+func TestKid_ServeHTTP_WriteStatusCodeIfNotWritten(t *testing.T) {
 	k := New()
 
 	k.Get("/test", func(c *Context) error {
@@ -472,7 +473,7 @@ func TestKidServeHTTP_WriteStatusCodeIfNotWritten(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, res.Code)
 }
 
-func TestKidDebug(t *testing.T) {
+func TestKid_Debug(t *testing.T) {
 	k := New()
 	k.debug = false
 
@@ -482,7 +483,7 @@ func TestKidDebug(t *testing.T) {
 	assert.True(t, k.Debug())
 }
 
-func TestKidRun(t *testing.T) {
+func TestKid_Run(t *testing.T) {
 	k := New()
 
 	k.Get("/", func(c *Context) error {
@@ -508,7 +509,7 @@ func TestKidRun(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"healthy\"}\n", string(body))
 }
 
-func TestKidStatic(t *testing.T) {
+func TestKid_Static(t *testing.T) {
 	k := New()
 
 	k.Static("/static/", "testdata/static")
@@ -561,7 +562,7 @@ func TestKidStatic(t *testing.T) {
 
 }
 
-func TestKidStaticFS(t *testing.T) {
+func TestKid_StaticFS(t *testing.T) {
 	k := New()
 
 	k.StaticFS("/static/", http.Dir("testdata/static"))
@@ -598,4 +599,27 @@ func TestKidStaticFS(t *testing.T) {
 		})
 	}
 
+}
+
+func TestResolveAddress(t *testing.T) {
+	addr := resolveAddress([]string{})
+
+	assert.Equal(t, ":2376", addr)
+
+	addr = resolveAddress([]string{":2377", "2378"})
+	assert.Equal(t, ":2377", addr)
+}
+
+func TestGetPath(t *testing.T) {
+	u, err := url.Parse("http://localhost/foo%25fbar")
+	assert.NoError(t, err)
+
+	assert.Empty(t, u.RawPath)
+	assert.Equal(t, u.Path, getPath(u))
+
+	u, err = url.Parse("http://localhost/foo%fbar")
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, u.RawPath)
+	assert.Equal(t, u.RawPath, getPath(u))
 }

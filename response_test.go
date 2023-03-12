@@ -18,7 +18,7 @@ func TestNewResponse(t *testing.T) {
 	assert.False(t, res.Written())
 }
 
-func TestResponseWriterWriteHeader(t *testing.T) {
+func TestResponseWriter_WriteHeader(t *testing.T) {
 	w := httptest.NewRecorder()
 	res := newResponse(w).(*response)
 
@@ -35,7 +35,7 @@ func TestResponseWriterWriteHeader(t *testing.T) {
 	assert.Equal(t, http.StatusAccepted, res.status)
 }
 
-func TestResponseWriterWriteHeaderNow(t *testing.T) {
+func TestResponseWriter_WriteHeaderNow(t *testing.T) {
 	w := httptest.NewRecorder()
 	res := newResponse(w).(*response)
 
@@ -45,7 +45,7 @@ func TestResponseWriterWriteHeaderNow(t *testing.T) {
 	assert.True(t, res.Written())
 }
 
-func TestResponseWriterSize(t *testing.T) {
+func TestResponseWriter_Size(t *testing.T) {
 	w := httptest.NewRecorder()
 	res := newResponse(w)
 
@@ -59,7 +59,7 @@ func TestResponseWriterSize(t *testing.T) {
 	assert.Equal(t, n1+n2, res.Size())
 }
 
-func TestResponseWriterWritten(t *testing.T) {
+func TestResponseWriter_Written(t *testing.T) {
 	w := httptest.NewRecorder()
 	res := newResponse(w)
 
@@ -70,7 +70,7 @@ func TestResponseWriterWritten(t *testing.T) {
 	assert.True(t, res.Written())
 }
 
-func TestResponseWriterFlush(t *testing.T) {
+func TestResponseWriter_Flush(t *testing.T) {
 	k := New()
 
 	k.Get("/", func(c *Context) error {
@@ -87,7 +87,7 @@ func TestResponseWriterFlush(t *testing.T) {
 	assert.Equal(t, http.StatusBadGateway, resp.StatusCode)
 }
 
-func TestResponseWriterHijack(t *testing.T) {
+func TestResponseWriter_Hijack(t *testing.T) {
 	w := httptest.NewRecorder()
 	res := newResponse(w)
 

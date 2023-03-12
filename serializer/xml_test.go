@@ -17,7 +17,7 @@ func TestNewXMLSerializer(t *testing.T) {
 	assert.IsType(t, defaultXMLSerializer{}, serializer)
 }
 
-func TestDefaultXMLSerializerWrite(t *testing.T) {
+func TestDefaultXMLSerializer_Write(t *testing.T) {
 	res := httptest.NewRecorder()
 
 	serializer := defaultXMLSerializer{}
@@ -47,7 +47,7 @@ func TestDefaultXMLSerializerWrite(t *testing.T) {
 	assert.Error(t, httpErr.Err)
 }
 
-func TestDefaultXMLSerializerRead(t *testing.T) {
+func TestDefaultXMLSerializer_Read(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader("<person><name>Mojix</name><age>22</age></person>"))
 
 	serializer := defaultXMLSerializer{}
