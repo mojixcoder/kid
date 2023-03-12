@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 	"time"
 
@@ -26,7 +27,7 @@ func TestNew(t *testing.T) {
 	assert.True(t, funcsAreEqual(defaultMethodNotAllowedHandler, k.methodNotAllowedHandler))
 }
 
-func TestKidUse(t *testing.T) {
+func TestKid_Use(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "middleware cannot be nil", func() {
@@ -40,18 +41,18 @@ func TestKidUse(t *testing.T) {
 	assert.Equal(t, 1, len(k.middlewares))
 }
 
-func TestKidGet(t *testing.T) {
+func TestKid_Get(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
-		k.GET("/", nil)
+		k.Get("/", nil)
 	})
 
-	k.GET("/test", func(c *Context) error {
+	k.Get("/test", func(c *Context) error {
 		return c.JSON(http.StatusOK, Map{"message": "ok"})
 	})
 
-	k.GET("/greet/{name}", func(c *Context) error {
+	k.Get("/greet/{name}", func(c *Context) error {
 		name := c.Param("name")
 		return c.JSON(http.StatusOK, Map{"message": fmt.Sprintf("Hello %s", name)})
 	})
@@ -79,14 +80,14 @@ func TestKidGet(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"Hello human\"}\n", res.Body.String())
 }
 
-func TestKidPost(t *testing.T) {
+func TestKid_Post(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
-		k.POST("/", nil)
+		k.Post("/", nil)
 	})
 
-	k.POST("/test", func(c *Context) error {
+	k.Post("/test", func(c *Context) error {
 		return c.JSON(http.StatusCreated, Map{"message": "ok"})
 	})
 
@@ -105,14 +106,14 @@ func TestKidPost(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"ok\"}\n", res.Body.String())
 }
 
-func TestKidPut(t *testing.T) {
+func TestKid_Put(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
-		k.PUT("/", nil)
+		k.Put("/", nil)
 	})
 
-	k.PUT("/test", func(c *Context) error {
+	k.Put("/test", func(c *Context) error {
 		return c.JSON(http.StatusCreated, Map{"message": "put"})
 	})
 
@@ -131,14 +132,14 @@ func TestKidPut(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"put\"}\n", res.Body.String())
 }
 
-func TestKidDelete(t *testing.T) {
+func TestKid_Delete(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
-		k.DELETE("/", nil)
+		k.Delete("/", nil)
 	})
 
-	k.DELETE("/test", func(c *Context) error {
+	k.Delete("/test", func(c *Context) error {
 		return c.JSON(http.StatusCreated, Map{"message": "deleted"})
 	})
 
@@ -157,14 +158,14 @@ func TestKidDelete(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"deleted\"}\n", res.Body.String())
 }
 
-func TestKidPatch(t *testing.T) {
+func TestKid_Patch(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
-		k.PATCH("/", nil)
+		k.Patch("/", nil)
 	})
 
-	k.PATCH("/test", func(c *Context) error {
+	k.Patch("/test", func(c *Context) error {
 		return c.JSON(http.StatusCreated, Map{"message": "patch"})
 	})
 
@@ -183,14 +184,14 @@ func TestKidPatch(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"patch\"}\n", res.Body.String())
 }
 
-func TestKidTrace(t *testing.T) {
+func TestKid_Trace(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
-		k.TRACE("/", nil)
+		k.Trace("/", nil)
 	})
 
-	k.TRACE("/test", func(c *Context) error {
+	k.Trace("/test", func(c *Context) error {
 		return c.JSON(http.StatusCreated, Map{"message": "trace"})
 	})
 
@@ -209,14 +210,14 @@ func TestKidTrace(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"trace\"}\n", res.Body.String())
 }
 
-func TestKidConnect(t *testing.T) {
+func TestKid_Connect(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
-		k.CONNECT("/", nil)
+		k.Connect("/", nil)
 	})
 
-	k.CONNECT("/test", func(c *Context) error {
+	k.Connect("/test", func(c *Context) error {
 		return c.JSON(http.StatusCreated, Map{"message": "connect"})
 	})
 
@@ -235,14 +236,14 @@ func TestKidConnect(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"connect\"}\n", res.Body.String())
 }
 
-func TestKidOptions(t *testing.T) {
+func TestKid_Options(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
-		k.OPTIONS("/", nil)
+		k.Options("/", nil)
 	})
 
-	k.OPTIONS("/test", func(c *Context) error {
+	k.Options("/test", func(c *Context) error {
 		return c.JSON(http.StatusCreated, Map{"message": "options"})
 	})
 
@@ -261,14 +262,14 @@ func TestKidOptions(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"options\"}\n", res.Body.String())
 }
 
-func TestKidHead(t *testing.T) {
+func TestKid_Head(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
-		k.HEAD("/", nil)
+		k.Head("/", nil)
 	})
 
-	k.HEAD("/test", func(c *Context) error {
+	k.Head("/test", func(c *Context) error {
 		return c.JSON(http.StatusCreated, Map{"message": "head"})
 	})
 
@@ -287,14 +288,14 @@ func TestKidHead(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"head\"}\n", res.Body.String())
 }
 
-func TestKidAdd(t *testing.T) {
+func TestKid_Add(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
-		k.ADD("/", nil, []string{http.MethodGet, http.MethodPost})
+		k.Add("/", nil, []string{http.MethodGet, http.MethodPost})
 	})
 
-	k.ADD("/test", func(c *Context) error {
+	k.Add("/test", func(c *Context) error {
 		return c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
 	}, []string{http.MethodGet, http.MethodPost})
 
@@ -323,14 +324,14 @@ func TestKidAdd(t *testing.T) {
 	}
 }
 
-func TestKidAny(t *testing.T) {
+func TestKid_Any(t *testing.T) {
 	k := New()
 
 	assert.PanicsWithValue(t, "handler cannot be nil", func() {
-		k.ANY("/", nil)
+		k.Any("/", nil)
 	})
 
-	k.ANY("/test", func(c *Context) error {
+	k.Any("/test", func(c *Context) error {
 		return c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
 	})
 
@@ -373,7 +374,7 @@ func TestKidAny(t *testing.T) {
 	}
 }
 
-func TestApplyMiddlewaresToHandler(t *testing.T) {
+func TestKid_applyMiddlewaresToHandler(t *testing.T) {
 	k := New()
 
 	middlewares := []MiddlewareFunc{
@@ -411,7 +412,7 @@ func TestApplyMiddlewaresToHandler(t *testing.T) {
 	assert.Equal(t, "{\"key1\":10,\"key2\":20}\n", res.Body.String())
 }
 
-func TestKidServeHTTP_NotFound(t *testing.T) {
+func TestKid_ServeHTTP_NotFound(t *testing.T) {
 	k := New()
 
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -424,10 +425,10 @@ func TestKidServeHTTP_NotFound(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"Not Found\"}\n", res.Body.String())
 }
 
-func TestKidServeHTTP_MethodnotAllowed(t *testing.T) {
+func TestKid_ServeHTTP_MethodnotAllowed(t *testing.T) {
 	k := New()
 
-	k.GET("/test", testHandlerFunc)
+	k.Get("/test", testHandlerFunc)
 
 	req := httptest.NewRequest(http.MethodPost, "/test", nil)
 	res := httptest.NewRecorder()
@@ -439,10 +440,10 @@ func TestKidServeHTTP_MethodnotAllowed(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"Method Not Allowed\"}\n", res.Body.String())
 }
 
-func TestKidServeHTTP_ErrorReturnedByHandler(t *testing.T) {
+func TestKid_ServeHTTP_ErrorReturnedByHandler(t *testing.T) {
 	k := New()
 
-	k.GET("/test", func(c *Context) error {
+	k.Get("/test", func(c *Context) error {
 		return errors.NewHTTPError(http.StatusForbidden)
 	})
 
@@ -456,10 +457,10 @@ func TestKidServeHTTP_ErrorReturnedByHandler(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"Forbidden\"}\n", res.Body.String())
 }
 
-func TestKidServeHTTP_WriteStatusCodeIfNotWritten(t *testing.T) {
+func TestKid_ServeHTTP_WriteStatusCodeIfNotWritten(t *testing.T) {
 	k := New()
 
-	k.GET("/test", func(c *Context) error {
+	k.Get("/test", func(c *Context) error {
 		c.Response().WriteHeader(http.StatusCreated)
 		return nil
 	})
@@ -472,7 +473,7 @@ func TestKidServeHTTP_WriteStatusCodeIfNotWritten(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, res.Code)
 }
 
-func TestKidDebug(t *testing.T) {
+func TestKid_Debug(t *testing.T) {
 	k := New()
 	k.debug = false
 
@@ -482,10 +483,10 @@ func TestKidDebug(t *testing.T) {
 	assert.True(t, k.Debug())
 }
 
-func TestKidRun(t *testing.T) {
+func TestKid_Run(t *testing.T) {
 	k := New()
 
-	k.GET("/", func(c *Context) error {
+	k.Get("/", func(c *Context) error {
 		return c.JSON(http.StatusOK, Map{"message": "healthy"})
 	})
 
@@ -508,7 +509,7 @@ func TestKidRun(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"healthy\"}\n", string(body))
 }
 
-func TestKidStatic(t *testing.T) {
+func TestKid_Static(t *testing.T) {
 	k := New()
 
 	k.Static("/static/", "testdata/static")
@@ -561,7 +562,7 @@ func TestKidStatic(t *testing.T) {
 
 }
 
-func TestKidStaticFS(t *testing.T) {
+func TestKid_StaticFS(t *testing.T) {
 	k := New()
 
 	k.StaticFS("/static/", http.Dir("testdata/static"))
@@ -598,4 +599,27 @@ func TestKidStaticFS(t *testing.T) {
 		})
 	}
 
+}
+
+func TestResolveAddress(t *testing.T) {
+	addr := resolveAddress([]string{})
+
+	assert.Equal(t, ":2376", addr)
+
+	addr = resolveAddress([]string{":2377", "2378"})
+	assert.Equal(t, ":2377", addr)
+}
+
+func TestGetPath(t *testing.T) {
+	u, err := url.Parse("http://localhost/foo%25fbar")
+	assert.NoError(t, err)
+
+	assert.Empty(t, u.RawPath)
+	assert.Equal(t, u.Path, getPath(u))
+
+	u, err = url.Parse("http://localhost/foo%fbar")
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, u.RawPath)
+	assert.Equal(t, u.RawPath, getPath(u))
 }

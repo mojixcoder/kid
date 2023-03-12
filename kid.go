@@ -2,6 +2,7 @@ package kid
 
 import (
 	"net/http"
+	"net/url"
 	"sync"
 
 	htmlrenderer "github.com/mojixcoder/kid/html_renderer"
@@ -75,73 +76,73 @@ func (k *Kid) Use(middleware MiddlewareFunc) {
 	k.middlewares = append(k.middlewares, middleware)
 }
 
-// GET registers a new handler for the given path for GET method.
+// Get registers a new handler for the given path for GET method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
-func (k *Kid) GET(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (k *Kid) Get(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	k.router.add(path, handler, []string{http.MethodGet}, middlewares)
 }
 
-// POST registers a new handler for the given path for POST method.
+// Post registers a new handler for the given path for POST method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
-func (k *Kid) POST(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (k *Kid) Post(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	k.router.add(path, handler, []string{http.MethodPost}, middlewares)
 }
 
-// PUT registers a new handler for the given path for PUT method.
+// Put registers a new handler for the given path for PUT method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
-func (k *Kid) PUT(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (k *Kid) Put(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	k.router.add(path, handler, []string{http.MethodPut}, middlewares)
 }
 
-// PATCH registers a new handler for the given path for PATCH method.
+// Patch registers a new handler for the given path for PATCH method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
-func (k *Kid) PATCH(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (k *Kid) Patch(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	k.router.add(path, handler, []string{http.MethodPatch}, middlewares)
 }
 
-// DELETE registers a new handler for the given path for DELETE method.
+// Delete registers a new handler for the given path for DELETE method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
-func (k *Kid) DELETE(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (k *Kid) Delete(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	k.router.add(path, handler, []string{http.MethodDelete}, middlewares)
 }
 
-// HEAD registers a new handler for the given path for HEAD method.
+// Head registers a new handler for the given path for HEAD method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
-func (k *Kid) HEAD(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (k *Kid) Head(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	k.router.add(path, handler, []string{http.MethodHead}, middlewares)
 }
 
-// OPTIONS registers a new handler for the given path for OPTIONS method.
+// Options registers a new handler for the given path for OPTIONS method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
-func (k *Kid) OPTIONS(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (k *Kid) Options(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	k.router.add(path, handler, []string{http.MethodOptions}, middlewares)
 }
 
-// CONNECT registers a new handler for the given path for CONNECT method.
+// Connect registers a new handler for the given path for CONNECT method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
-func (k *Kid) CONNECT(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (k *Kid) Connect(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	k.router.add(path, handler, []string{http.MethodConnect}, middlewares)
 }
 
-// TRACE registers a new handler for the given path for TRACE method.
+// Trace registers a new handler for the given path for TRACE method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
-func (k *Kid) TRACE(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (k *Kid) Trace(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	k.router.add(path, handler, []string{http.MethodTrace}, middlewares)
 }
 
-// ANY registers a new handler for the given path for all of the HTTP methods.
+// Any registers a new handler for the given path for all of the HTTP methods.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
-func (k *Kid) ANY(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
+func (k *Kid) Any(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
 	methods := []string{
 		http.MethodGet, http.MethodPost, http.MethodPut,
 		http.MethodPatch, http.MethodDelete, http.MethodHead,
@@ -150,11 +151,11 @@ func (k *Kid) ANY(path string, handler HandlerFunc, middlewares ...MiddlewareFun
 	k.router.add(path, handler, methods, middlewares)
 }
 
-// ADD registers a new handler for the given path for the given methods.
+// Add registers a new handler for the given path for the given methods.
 // Specifying at least one method is required.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
-func (k *Kid) ADD(path string, handler HandlerFunc, methods []string, middlewares ...MiddlewareFunc) {
+func (k *Kid) Add(path string, handler HandlerFunc, methods []string, middlewares ...MiddlewareFunc) {
 	k.router.add(path, handler, methods, middlewares)
 }
 
@@ -219,4 +220,20 @@ func (k *Kid) applyMiddlewaresToHandler(handler HandlerFunc, middlewares ...Midd
 		handler = middlewares[i](handler)
 	}
 	return handler
+}
+
+// getPath returns request's path.
+func getPath(u *url.URL) string {
+	if u.RawPath != "" {
+		return u.RawPath
+	}
+	return u.Path
+}
+
+// resolveAddress returns the address which server will run on.
+func resolveAddress(addresses []string) string {
+	if len(addresses) == 0 {
+		return ":2376"
+	}
+	return addresses[0]
 }

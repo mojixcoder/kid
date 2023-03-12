@@ -18,7 +18,7 @@ func TestNewHTTPError(t *testing.T) {
 	assert.Nil(t, err.Err)
 }
 
-func TestWithMessage(t *testing.T) {
+func TestHTTPError_WithMessage(t *testing.T) {
 	err := NewHTTPError(http.StatusOK).WithMessage("new message")
 
 	assert.Equal(t, http.StatusOK, err.Code)
@@ -26,7 +26,7 @@ func TestWithMessage(t *testing.T) {
 	assert.Nil(t, err.Err)
 }
 
-func TestWithError(t *testing.T) {
+func TestHTTPError_WithError(t *testing.T) {
 	someErr := errors.New("some error")
 	err := NewHTTPError(http.StatusOK).WithError(someErr)
 
@@ -35,7 +35,7 @@ func TestWithError(t *testing.T) {
 	assert.ErrorIs(t, err.Err, someErr)
 }
 
-func TestError(t *testing.T) {
+func TestHTTPError_Error(t *testing.T) {
 	err := NewHTTPError(http.StatusOK)
 
 	assert.Equal(t, `{"code": 200, "message": "OK"}`, err.Error())
@@ -45,7 +45,7 @@ func TestError(t *testing.T) {
 	assert.Equal(t, `{"code": 200, "message": "something went wrong", "error": "some error"}`, err.Error())
 }
 
-func TestUnwrap(t *testing.T) {
+func TestHTTPError_Unwrap(t *testing.T) {
 	someErr := errors.New("some error")
 	err := NewHTTPError(http.StatusForbidden).WithError(someErr)
 

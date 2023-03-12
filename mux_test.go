@@ -51,7 +51,7 @@ func TestCleanPath(t *testing.T) {
 	assert.Equal(t, "/api/v1/books/offer", cleanedPath)
 }
 
-func TestAdd(t *testing.T) {
+func TestRouter_add(t *testing.T) {
 	router := newRouter()
 
 	assert.PanicsWithValue(t, "providing at least one method is required", func() {
@@ -142,7 +142,7 @@ func TestAdd(t *testing.T) {
 	}
 }
 
-func TestMatch(t *testing.T) {
+func TestRouter_match(t *testing.T) {
 	router := newRouter()
 
 	router.add("/", testHandlerFunc, []string{http.MethodGet}, nil)
@@ -265,7 +265,7 @@ func TestMatch(t *testing.T) {
 	assert.Nil(t, params)
 }
 
-func TestFind(t *testing.T) {
+func TestRouter_find(t *testing.T) {
 	router := newRouter()
 
 	router.add("/", testHandlerFunc, []string{http.MethodGet}, nil)
@@ -349,7 +349,7 @@ func TestFind(t *testing.T) {
 	assert.True(t, funcsAreEqual(testMiddlewareFunc, route.middlewares[0]))
 }
 
-func TestRouterIsPlus(t *testing.T) {
+func TestRouter_isPlus(t *testing.T) {
 	router := newRouter()
 
 	isPlus := router.isPlus("{+param}")

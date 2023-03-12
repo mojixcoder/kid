@@ -46,7 +46,7 @@ func TestDefault(t *testing.T) {
 	assert.Empty(t, htmlRenderer.templates)
 }
 
-func TestDefaultHTMLRendererAddFunc(t *testing.T) {
+func TestDefaultHTMLRenderer_AddFunc(t *testing.T) {
 	htmlRenderer := Default(false)
 
 	assert.PanicsWithValue(t, "function cannot be nil", func() {
@@ -58,7 +58,7 @@ func TestDefaultHTMLRendererAddFunc(t *testing.T) {
 	assert.Equal(t, 1, len(htmlRenderer.funcMap))
 }
 
-func TestDefaultHTMLRendererGetTemplateAndLayoutFiles(t *testing.T) {
+func TestDefaultHTMLRenderer_getTemplateAndLayoutFiles(t *testing.T) {
 	htmlRenderer := newTestHTMLRenderer()
 
 	templateFiles, layoutFiles, err := htmlRenderer.getTemplateAndLayoutFiles()
@@ -86,7 +86,7 @@ func TestDefaultHTMLRendererGetTemplateAndLayoutFiles(t *testing.T) {
 	assert.Nil(t, templateFiles)
 }
 
-func TestDefaultHTMLRendererLoadTemplates(t *testing.T) {
+func TestDefaultHTMLRenderer_loadTemplates(t *testing.T) {
 	htmlRenderer := newTestHTMLRenderer()
 	htmlRenderer.rootDir = "invalid_path"
 
@@ -113,7 +113,7 @@ func TestDefaultHTMLRendererLoadTemplates(t *testing.T) {
 	assert.IsType(t, &template.Template{}, htmlRenderer.templates["pages/page2.html"])
 }
 
-func TestDefaultHTMLRendererShouldntLoadTemplates(t *testing.T) {
+func TestDefaultHTMLRenderer_shouldntLoadTemplates(t *testing.T) {
 	htmlRenderer := newTestHTMLRenderer()
 
 	htmlRenderer.debug = false
@@ -133,21 +133,21 @@ func TestDefaultHTMLRendererShouldntLoadTemplates(t *testing.T) {
 	assert.True(t, htmlRenderer.shouldntLoadTemplates())
 }
 
-func TestDefaultHTMLRendererIsLayout(t *testing.T) {
+func TestDefaultHTMLRenderer_isLayout(t *testing.T) {
 	htmlRenderer := newTestHTMLRenderer()
 
 	assert.False(t, htmlRenderer.isLayout("../testdata/templates/index.html"))
 	assert.True(t, htmlRenderer.isLayout("../testdata/templates/layouts/base.html"))
 }
 
-func TestDefaultHTMLRendererGetTemplateName(t *testing.T) {
+func TestDefaultHTMLRenderer_getTemplateName(t *testing.T) {
 	htmlRenderer := newTestHTMLRenderer()
 
 	assert.Equal(t, "index.html", htmlRenderer.getTemplateName("../testdata/templates/index.html"))
 	assert.Equal(t, "pages/page.html", htmlRenderer.getTemplateName("../testdata/templates/pages/page.html"))
 }
 
-func TestDefaultHTMLRendererGetFilesToParse(t *testing.T) {
+func TestDefaultHTMLRenderer_getFilesToParse(t *testing.T) {
 	layouts := []string{"base.html"}
 	file := "index.html"
 
@@ -156,7 +156,7 @@ func TestDefaultHTMLRendererGetFilesToParse(t *testing.T) {
 	assert.Equal(t, []string{file, layouts[0]}, files)
 }
 
-func TestDefaultHTMLRendererRenderHTML(t *testing.T) {
+func TestDefaultHTMLRenderer_RenderHTML(t *testing.T) {
 	htmlRenderer := newTestHTMLRenderer()
 	htmlRenderer.rootDir = "invalid_path"
 

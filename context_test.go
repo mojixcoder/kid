@@ -40,7 +40,7 @@ func TestNewContext(t *testing.T) {
 	assert.Nil(t, ctx.response)
 }
 
-func TestContextReset(t *testing.T) {
+func TestContext_reset(t *testing.T) {
 	ctx := newContext(New())
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -55,7 +55,7 @@ func TestContextReset(t *testing.T) {
 	assert.Equal(t, make(Params), ctx.params)
 }
 
-func TestContextRequest(t *testing.T) {
+func TestContext_Request(t *testing.T) {
 	ctx := newContext(New())
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -65,7 +65,7 @@ func TestContextRequest(t *testing.T) {
 	assert.Equal(t, req, ctx.Request())
 }
 
-func TestContextResponse(t *testing.T) {
+func TestContext_Response(t *testing.T) {
 	ctx := newContext(New())
 
 	res := httptest.NewRecorder()
@@ -76,7 +76,7 @@ func TestContextResponse(t *testing.T) {
 	assert.Equal(t, expectedRes, ctx.Response())
 }
 
-func TestContextSetParams(t *testing.T) {
+func TestContext_setParams(t *testing.T) {
 	ctx := newContext(New())
 
 	params := Params{"foo": "bar", "abc": "xyz"}
@@ -86,7 +86,7 @@ func TestContextSetParams(t *testing.T) {
 	assert.Equal(t, params, ctx.params)
 }
 
-func TestContextParams(t *testing.T) {
+func TestContext_Params(t *testing.T) {
 	ctx := newContext(New())
 
 	params := Params{"foo": "bar", "abc": "xyz"}
@@ -96,7 +96,7 @@ func TestContextParams(t *testing.T) {
 	assert.Equal(t, params, ctx.Params())
 }
 
-func TestContextParam(t *testing.T) {
+func TestContext_Param(t *testing.T) {
 	ctx := newContext(New())
 
 	params := Params{"foo": "bar", "abc": "xyz"}
@@ -107,7 +107,7 @@ func TestContextParam(t *testing.T) {
 	assert.Equal(t, params["abc"], ctx.Param("abc"))
 }
 
-func TestContextQueryParams(t *testing.T) {
+func TestContext_QueryParams(t *testing.T) {
 	ctx := newContext(New())
 
 	req := httptest.NewRequest(http.MethodGet, "/?foo=bar&abc=xyz&abc=2", nil)
@@ -123,7 +123,7 @@ func TestContextQueryParams(t *testing.T) {
 	assert.Equal(t, url.Values{}, ctx.QueryParams())
 }
 
-func TestContextQueryParam(t *testing.T) {
+func TestContext_QueryParam(t *testing.T) {
 	ctx := newContext(New())
 
 	req := httptest.NewRequest(http.MethodGet, "/?foo=bar&abc=xyz&abc=2", nil)
@@ -135,7 +135,7 @@ func TestContextQueryParam(t *testing.T) {
 	assert.Equal(t, "", ctx.QueryParam("does_not_exist"))
 }
 
-func TestContextQueryParamMultiple(t *testing.T) {
+func TestContext_QueryParamMultiple(t *testing.T) {
 	ctx := newContext(New())
 
 	req := httptest.NewRequest(http.MethodGet, "/?foo=bar&abc=xyz&abc=2", nil)
@@ -147,7 +147,7 @@ func TestContextQueryParamMultiple(t *testing.T) {
 	assert.Equal(t, []string{}, ctx.QueryParamMultiple("does_not_exist"))
 }
 
-func TestContextSet(t *testing.T) {
+func TestContext_Set(t *testing.T) {
 	ctx := newContext(New())
 	ctx.reset(nil, nil)
 
@@ -160,7 +160,7 @@ func TestContextSet(t *testing.T) {
 	assert.Equal(t, 1, len(ctx.storage))
 }
 
-func TestContextGet(t *testing.T) {
+func TestContext_Get(t *testing.T) {
 	ctx := newContext(New())
 	ctx.reset(nil, nil)
 
@@ -172,7 +172,7 @@ func TestContextGet(t *testing.T) {
 	assert.Equal(t, 12.64, val)
 }
 
-func TestContextGetSetDataRace(t *testing.T) {
+func TestContext_GetSet_DataRace(t *testing.T) {
 	ctx := newContext(New())
 	ctx.reset(nil, nil)
 
@@ -188,7 +188,7 @@ func TestContextGetSetDataRace(t *testing.T) {
 	<-ch
 }
 
-func TestContextWriteContentType(t *testing.T) {
+func TestContext_writeContentType(t *testing.T) {
 	ctx := newContext(New())
 
 	res := httptest.NewRecorder()
@@ -207,7 +207,7 @@ func TestContextWriteContentType(t *testing.T) {
 	assert.Equal(t, "application/json", ctx.response.Header().Get("Content-Type"))
 }
 
-func TestNoContent(t *testing.T) {
+func Test_NoContent(t *testing.T) {
 	ctx := newContext(New())
 
 	res := httptest.NewRecorder()
@@ -218,7 +218,7 @@ func TestNoContent(t *testing.T) {
 	assert.Equal(t, http.StatusNoContent, res.Code)
 }
 
-func TestContextReadJSON(t *testing.T) {
+func TestContext_ReadJSON(t *testing.T) {
 	ctx := newContext(New())
 
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader("{\"name\":\"Mojix\",\"age\":22}"))
@@ -245,7 +245,7 @@ func TestContextReadJSON(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
 }
 
-func TestContextJSON(t *testing.T) {
+func TestContext_JSON(t *testing.T) {
 	ctx := newContext(New())
 
 	res := httptest.NewRecorder()
@@ -271,7 +271,7 @@ func TestContextJSON(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
 }
 
-func TestContextJSONIndent(t *testing.T) {
+func TestContext_JSONIndent(t *testing.T) {
 	ctx := newContext(New())
 
 	res := httptest.NewRecorder()
@@ -297,7 +297,7 @@ func TestContextJSONIndent(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
 }
 
-func TestContextJSONByte(t *testing.T) {
+func TestContext_JSONByte(t *testing.T) {
 	ctx := newContext(New())
 
 	res := httptest.NewRecorder()
@@ -317,7 +317,7 @@ func TestContextJSONByte(t *testing.T) {
 	assert.Equal(t, "{\"name\":\"foo\",\"age\":1999}", res.Body.String())
 }
 
-func TestContextReadXML(t *testing.T) {
+func TestContext_ReadXML(t *testing.T) {
 	ctx := newContext(New())
 
 	req := httptest.NewRequest(http.MethodGet, "/", strings.NewReader("<person><name>Mojix</name><age>22</age></person>"))
@@ -342,7 +342,7 @@ func TestContextReadXML(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
 }
 
-func TestContextXML(t *testing.T) {
+func TestContext_XML(t *testing.T) {
 	ctx := newContext(New())
 
 	res := httptest.NewRecorder()
@@ -368,7 +368,7 @@ func TestContextXML(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
 }
 
-func TestContextXMLIndent(t *testing.T) {
+func TestContext_XMLIndent(t *testing.T) {
 	ctx := newContext(New())
 
 	res := httptest.NewRecorder()
@@ -394,7 +394,7 @@ func TestContextXMLIndent(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
 }
 
-func TestContextXMLByte(t *testing.T) {
+func TestContext_XMLByte(t *testing.T) {
 	ctx := newContext(New())
 
 	res := httptest.NewRecorder()
@@ -414,7 +414,7 @@ func TestContextXMLByte(t *testing.T) {
 	assert.Equal(t, "<person><name>foo</name><age>1999</age></person>", res.Body.String())
 }
 
-func TestContextHTML(t *testing.T) {
+func TestContext_HTML(t *testing.T) {
 	k := New()
 	renderer := htmlrenderer.New("testdata/templates/", "layouts/", ".html", false)
 	renderer.AddFunc("greet", func() int { return 1 })
@@ -439,7 +439,7 @@ func TestContextHTML(t *testing.T) {
 	assert.Equal(t, "text/html", res.Header().Get("Content-Type"))
 }
 
-func TestContextHTMLString(t *testing.T) {
+func TestContext_HTMLString(t *testing.T) {
 	ctx := newContext(New())
 
 	res := httptest.NewRecorder()

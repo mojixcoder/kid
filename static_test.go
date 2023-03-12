@@ -24,7 +24,7 @@ func TestNewFileServer(t *testing.T) {
 	assert.NotNil(t, fileServer)
 }
 
-func TestFileReaddir(t *testing.T) {
+func TestFile_Readdir(t *testing.T) {
 	var f File
 
 	info, err := f.Readdir(10)
@@ -33,7 +33,7 @@ func TestFileReaddir(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestFSOpen(t *testing.T) {
+func TestFS_Open(t *testing.T) {
 	fs := FS{http.Dir("testdata/static")}
 
 	f, err := fs.Open("non-existent.js")
