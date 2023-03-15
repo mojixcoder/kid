@@ -34,9 +34,7 @@ func (fs FS) Open(name string) (http.File, error) {
 
 // newFileServer returns new file server.
 func newFileServer(urlPath string, fs http.FileSystem) http.Handler {
-	if fs == nil {
-		panic("file system cannot be nil")
-	}
+	panicIfNil(fs, "file system cannot be nil")
 
 	urlPath = cleanPath(urlPath, false)
 	urlPath = appendSlash(urlPath)

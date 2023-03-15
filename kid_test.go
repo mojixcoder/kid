@@ -623,3 +623,63 @@ func TestGetPath(t *testing.T) {
 	assert.NotEmpty(t, u.RawPath)
 	assert.Equal(t, u.RawPath, getPath(u))
 }
+
+func TestApplyOptions(t *testing.T) {
+	k := New()
+
+	assert.PanicsWithValue(t, "option cannot be nil", func() {
+		k.ApplyOptions(nil)
+	})
+
+	handler := func(c *Context, err error) {
+	}
+
+	k.ApplyOptions(
+		WithDebug(true),
+		WithErrorHandler(handler),
+	)
+
+	assert.True(t, k.Debug())
+	assert.True(t, funcsAreEqual(handler, k.errorHandler))
+}
+
+func TestPanicIfNil(t *testing.T) {
+	assert.PanicsWithValue(t, "nil", func() {
+		panicIfNil(nil, "nil")
+	})
+
+	assert.Panics(t, func() {
+		var x *int
+		panicIfNil(x, "")
+	})
+
+	assert.Panics(t, func() {
+		var x []string
+		panicIfNil(x, "")
+	})
+
+	assert.Panics(t, func() {
+		var x map[string]string
+		panicIfNil(x, "")
+	})
+
+	assert.Panics(t, func() {
+		var x interface{}
+		panicIfNil(x, "")
+	})
+
+	assert.Panics(t, func() {
+		var x func()
+		panicIfNil(x, "")
+	})
+
+	assert.Panics(t, func() {
+		var x chan bool
+		panicIfNil(x, "")
+	})
+
+	assert.Panics(t, func() {
+		var x [1]int
+		panicIfNil(x, "")
+	})
+}
