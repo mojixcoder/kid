@@ -3,6 +3,7 @@ package kid
 import (
 	"net/http"
 	"net/url"
+	"reflect"
 	"sync"
 
 	htmlrenderer "github.com/mojixcoder/kid/html_renderer"
@@ -69,9 +70,7 @@ func (k *Kid) Run(address ...string) error {
 
 // Use registers a new middleware. The middleware will be applied to all of the routes.
 func (k *Kid) Use(middleware MiddlewareFunc) {
-	if middleware == nil {
-		panic("middleware cannot be nil")
-	}
+	panicIfNil(middleware, "middleware cannot be nil")
 
 	k.middlewares = append(k.middlewares, middleware)
 }
@@ -209,17 +208,26 @@ func (k *Kid) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	k.pool.Put(c)
 }
 
-// Debug returns whether we are in debug mode or not.
-func (k *Kid) Debug() bool {
-	return k.debug
-}
-
 // applyMiddlewaresToHandler applies middlewares to the handler and returns the handler.
 func (k *Kid) applyMiddlewaresToHandler(handler HandlerFunc, middlewares ...MiddlewareFunc) HandlerFunc {
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		handler = middlewares[i](handler)
 	}
 	return handler
+}
+
+// Debug returns whether we are in debug mode or not.
+func (k *Kid) Debug() bool {
+	return k.debug
+}
+
+// ApplyOptions applies the given options.
+func (k *Kid) ApplyOptions(opts ...Option) {
+	for _, opt := range opts {
+		panicIfNil(opt, "option cannot be nil")
+
+		opt.apply(k)
+	}
 }
 
 // getPath returns request's path.
@@ -236,4 +244,18 @@ func resolveAddress(addresses []string) string {
 		return ":2376"
 	}
 	return addresses[0]
+}
+
+// panicIfNil panics if the given parameter is nil.
+func panicIfNil(x any, message string) {
+	if x == nil {
+		panic(message)
+	}
+
+	switch reflect.TypeOf(x).Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Array, reflect.Chan, reflect.Slice, reflect.Interface, reflect.Func:
+		if reflect.ValueOf(x).IsNil() {
+			panic(message)
+		}
+	}
 }

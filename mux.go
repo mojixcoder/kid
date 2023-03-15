@@ -57,9 +57,7 @@ func (router *Router) add(path string, handler HandlerFunc, methods []string, mi
 		panic("providing at least one method is required")
 	}
 
-	if handler == nil {
-		panic("handler cannot be nil")
-	}
+	panicIfNil(handler, "handler cannot be nil")
 
 	path = cleanPath(path, false)
 
