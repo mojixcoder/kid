@@ -1,8 +1,11 @@
 package kid
 
 import (
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"reflect"
 	"sync"
 
@@ -40,6 +43,9 @@ type (
 	}
 )
 
+// Version is the Kid version.
+const Version string = "0.1.0"
+
 // New returns a new instance of Kid.
 func New() *Kid {
 	kid := Kid{
@@ -51,6 +57,7 @@ func New() *Kid {
 		jsonSerializer:          serializer.NewJSONSerializer(),
 		xmlSerializer:           serializer.NewXMLSerializer(),
 		htmlRenderer:            htmlrenderer.Default(false),
+		debug:                   true,
 	}
 
 	kid.pool.New = func() any {
@@ -65,6 +72,11 @@ func New() *Kid {
 // Specifying an address is optional. Default address is :2376.
 func (k *Kid) Run(address ...string) error {
 	addr := resolveAddress(address)
+
+	k.printDebug(os.Stdout, "Kid version %s\n", Version)
+	k.printDebug(os.Stdout, "Starting server at %s\n", addr)
+	k.printDebug(os.Stdout, "Quit the server with CONTROL-C\n")
+
 	return http.ListenAndServe(addr, k)
 }
 
@@ -227,6 +239,13 @@ func (k *Kid) ApplyOptions(opts ...Option) {
 		panicIfNil(opt, "option cannot be nil")
 
 		opt.apply(k)
+	}
+}
+
+// printDebug prints logs only in debug mode.
+func (k *Kid) printDebug(w io.Writer, format string, values ...any) {
+	if k.Debug() {
+		fmt.Fprintf(w, "[DEBUG] "+format, values...)
 	}
 }
 

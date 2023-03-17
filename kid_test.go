@@ -1,6 +1,7 @@
 package kid
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,6 +26,7 @@ func TestNew(t *testing.T) {
 	assert.True(t, funcsAreEqual(defaultErrorHandler, k.errorHandler))
 	assert.True(t, funcsAreEqual(defaultNotFoundHandler, k.notFoundHandler))
 	assert.True(t, funcsAreEqual(defaultMethodNotAllowedHandler, k.methodNotAllowedHandler))
+	assert.True(t, k.Debug())
 }
 
 func TestKid_Use(t *testing.T) {
@@ -559,7 +561,6 @@ func TestKid_Static(t *testing.T) {
 			assert.Equal(t, testCase.expectedContent, testCase.res.Body.String())
 		})
 	}
-
 }
 
 func TestKid_StaticFS(t *testing.T) {
@@ -598,7 +599,21 @@ func TestKid_StaticFS(t *testing.T) {
 			assert.Equal(t, testCase.expectedContent, testCase.res.Body.String())
 		})
 	}
+}
 
+func TestKid_printDebug(t *testing.T) {
+	k := New()
+
+	var w bytes.Buffer
+
+	k.printDebug(&w, "hello %s\n", "Kid")
+	assert.Equal(t, "[DEBUG] hello Kid\n", w.String())
+
+	w.Reset()
+	k.debug = false
+
+	k.printDebug(&w, "hello %s\n", "Kid")
+	assert.Empty(t, w.String())
 }
 
 func TestResolveAddress(t *testing.T) {
