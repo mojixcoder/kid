@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"runtime"
 	"testing"
 	"time"
 
@@ -617,11 +618,16 @@ func TestKid_printDebug(t *testing.T) {
 }
 
 func TestResolveAddress(t *testing.T) {
-	addr := resolveAddress([]string{})
+	goos := runtime.GOOS
+	addr := resolveAddress([]string{}, goos)
 
-	assert.Equal(t, ":2376", addr)
+	if goos == "windows" {
+		assert.Equal(t, "127.0.0.1:2376", addr)
+	} else {
+		assert.Equal(t, "0.0.0.0:2376", addr)
+	}
 
-	addr = resolveAddress([]string{":2377", "2378"})
+	addr = resolveAddress([]string{":2377", ":2378"}, goos)
 	assert.Equal(t, ":2377", addr)
 }
 
