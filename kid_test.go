@@ -617,11 +617,15 @@ func TestKid_printDebug(t *testing.T) {
 }
 
 func TestResolveAddress(t *testing.T) {
-	addr := resolveAddress([]string{})
+	goos := "windows"
+	addr := resolveAddress([]string{}, goos)
+	assert.Equal(t, "127.0.0.1:2376", addr)
 
-	assert.Equal(t, ":2376", addr)
+	goos = "linux"
+	addr = resolveAddress([]string{}, goos)
+	assert.Equal(t, "0.0.0.0:2376", addr)
 
-	addr = resolveAddress([]string{":2377", "2378"})
+	addr = resolveAddress([]string{":2377", ":2378"}, goos)
 	assert.Equal(t, ":2377", addr)
 }
 

@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"reflect"
+	"runtime"
 	"sync"
 
 	htmlrenderer "github.com/mojixcoder/kid/html_renderer"
@@ -43,7 +44,7 @@ type (
 	}
 )
 
-// Version is the Kid version.
+// Version of Kid.
 const Version string = "0.1.0"
 
 // New returns a new instance of Kid.
@@ -71,7 +72,7 @@ func New() *Kid {
 //
 // Specifying an address is optional. Default address is :2376.
 func (k *Kid) Run(address ...string) error {
-	addr := resolveAddress(address)
+	addr := resolveAddress(address, runtime.GOOS)
 
 	k.printDebug(os.Stdout, "Kid version %s\n", Version)
 	k.printDebug(os.Stdout, "Starting server at %s\n", addr)
@@ -258,9 +259,12 @@ func getPath(u *url.URL) string {
 }
 
 // resolveAddress returns the address which server will run on.
-func resolveAddress(addresses []string) string {
+func resolveAddress(addresses []string, goos string) string {
 	if len(addresses) == 0 {
-		return ":2376"
+		if goos == "windows" {
+			return "127.0.0.1:2376"
+		}
+		return "0.0.0.0:2376"
 	}
 	return addresses[0]
 }
