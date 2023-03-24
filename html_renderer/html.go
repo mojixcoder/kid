@@ -13,13 +13,13 @@ import (
 )
 
 var (
-	// Default root directory.
+	// DefaultRootDir is the default root directory.
 	DefaultRootDir = filepath.FromSlash("templates/")
 
-	// Default layout directory. Relative to root directory.
+	// DefaultLayoutsDir is the default layout directory. Relative to root directory.
 	DefaultLayoutsDir = filepath.FromSlash("layouts/")
 
-	// Default template file extensions.
+	// DefaultExtension is the default template file extensions.
 	DefaultExtension = ".html"
 
 	// ErrTemplateNotFound is the internal error when template is not found.
