@@ -1,3 +1,7 @@
+// Package serializer provides an interface to read from request body or write to response body.
+// Can be used for reading/writing JSON, XML, MessagePack, etc.
+//
+// Currently the supported ones are JSON and XML.
 package serializer
 
 import (

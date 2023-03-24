@@ -1,4 +1,5 @@
 // Package errors implements error interface.
+//
 // HTTPError has first class support in Kid and is used for returning proper responses when an error happens.
 package errors
 
@@ -38,7 +39,7 @@ func (e *HTTPError) WithError(err error) *HTTPError {
 	return e
 }
 
-// WithMessage sets a new message for the error.
+// WithMessage sets the error message.
 //
 // This message will be sent in response in Kid's default error handler. So it should of a type which can be converted to JSON.
 func (e *HTTPError) WithMessage(message any) *HTTPError {
