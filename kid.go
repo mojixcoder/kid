@@ -47,6 +47,13 @@ type (
 // Version of Kid.
 const Version string = "0.1.0"
 
+// allMethods is all of the HTTP methods.
+var allMethods = []string{
+	http.MethodGet, http.MethodPost, http.MethodPut,
+	http.MethodPatch, http.MethodDelete, http.MethodHead,
+	http.MethodOptions, http.MethodConnect, http.MethodTrace,
+}
+
 // New returns a new instance of Kid.
 func New() *Kid {
 	kid := Kid{
@@ -155,12 +162,7 @@ func (k *Kid) Trace(path string, handler HandlerFunc, middlewares ...MiddlewareF
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Any(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	methods := []string{
-		http.MethodGet, http.MethodPost, http.MethodPut,
-		http.MethodPatch, http.MethodDelete, http.MethodHead,
-		http.MethodOptions, http.MethodConnect, http.MethodTrace,
-	}
-	k.router.add(path, handler, methods, middlewares)
+	k.router.add(path, handler, allMethods, middlewares)
 }
 
 // Group creates a new router group.
