@@ -19,7 +19,7 @@ var (
 	// DefaultLayoutsDir is the default layout directory. Relative to root directory.
 	DefaultLayoutsDir = filepath.FromSlash("layouts/")
 
-	// DefaultExtension is the default template file extensions.
+	// DefaultExtension is the default template file extension.
 	DefaultExtension = ".html"
 
 	// ErrTemplateNotFound is the internal error when template is not found.
