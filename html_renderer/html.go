@@ -1,3 +1,4 @@
+// Package htmlrenderer provides an interface and its implementations for rendering HTML pages.
 package htmlrenderer
 
 import (
