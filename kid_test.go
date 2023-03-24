@@ -376,6 +376,24 @@ func TestKid_Any(t *testing.T) {
 	}
 }
 
+func TestKid_Group(t *testing.T) {
+	k := New()
+	g := k.Group("/v1")
+
+	g.Get("/path", func(c *Context) error {
+		return c.JSON(http.StatusOK, Map{"message": "group"})
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/v1/path", nil)
+	res := httptest.NewRecorder()
+
+	k.ServeHTTP(res, req)
+
+	assert.Equal(t, http.StatusOK, res.Code)
+	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
+	assert.Equal(t, "{\"message\":\"group\"}\n", res.Body.String())
+}
+
 func TestKid_applyMiddlewaresToHandler(t *testing.T) {
 	k := New()
 
