@@ -84,12 +84,7 @@ func (g *Group) Trace(path string, handler HandlerFunc, middlewares ...Middlewar
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (g *Group) Any(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	methods := []string{
-		http.MethodGet, http.MethodPost, http.MethodPut,
-		http.MethodPatch, http.MethodDelete, http.MethodHead,
-		http.MethodOptions, http.MethodConnect, http.MethodTrace,
-	}
-	g.Add(path, handler, methods, middlewares...)
+	g.Add(path, handler, allMethods, middlewares...)
 }
 
 // Add adds a route to the group routes.
