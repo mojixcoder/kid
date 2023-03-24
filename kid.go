@@ -163,6 +163,13 @@ func (k *Kid) Any(path string, handler HandlerFunc, middlewares ...MiddlewareFun
 	k.router.add(path, handler, methods, middlewares)
 }
 
+// Group creates a new router group.
+//
+// Specifying middlewares is optional. Middlewares will be applied to all of the group routes.
+func (k *Kid) Group(prefix string, middlewares ...MiddlewareFunc) Group {
+	return newGroup(k, prefix, middlewares...)
+}
+
 // Add registers a new handler for the given path for the given methods.
 // Specifying at least one method is required.
 //
