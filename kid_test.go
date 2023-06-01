@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mojixcoder/kid/errors"
 	"github.com/mojixcoder/kid/serializer"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +22,6 @@ func TestNew(t *testing.T) {
 	assert.Equal(t, 0, len(k.middlewares))
 	assert.Equal(t, serializer.NewJSONSerializer(), k.jsonSerializer)
 	assert.Equal(t, serializer.NewXMLSerializer(), k.xmlSerializer)
-	assert.True(t, funcsAreEqual(defaultErrorHandler, k.errorHandler))
 	assert.True(t, funcsAreEqual(defaultNotFoundHandler, k.notFoundHandler))
 	assert.True(t, funcsAreEqual(defaultMethodNotAllowedHandler, k.methodNotAllowedHandler))
 	assert.True(t, k.Debug())
@@ -50,13 +48,13 @@ func TestKid_Get(t *testing.T) {
 		k.Get("/", nil)
 	})
 
-	k.Get("/test", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"message": "ok"})
+	k.Get("/test", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"message": "ok"})
 	})
 
-	k.Get("/greet/{name}", func(c *Context) error {
+	k.Get("/greet/{name}", func(c *Context) {
 		name := c.Param("name")
-		return c.JSON(http.StatusOK, Map{"message": fmt.Sprintf("Hello %s", name)})
+		c.JSON(http.StatusOK, Map{"message": fmt.Sprintf("Hello %s", name)})
 	})
 
 	assert.Equal(t, 2, len(k.router.routes))
@@ -89,8 +87,8 @@ func TestKid_Post(t *testing.T) {
 		k.Post("/", nil)
 	})
 
-	k.Post("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": "ok"})
+	k.Post("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": "ok"})
 	})
 
 	assert.Equal(t, 1, len(k.router.routes))
@@ -115,8 +113,8 @@ func TestKid_Put(t *testing.T) {
 		k.Put("/", nil)
 	})
 
-	k.Put("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": "put"})
+	k.Put("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": "put"})
 	})
 
 	assert.Equal(t, 1, len(k.router.routes))
@@ -141,8 +139,8 @@ func TestKid_Delete(t *testing.T) {
 		k.Delete("/", nil)
 	})
 
-	k.Delete("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": "deleted"})
+	k.Delete("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": "deleted"})
 	})
 
 	assert.Equal(t, 1, len(k.router.routes))
@@ -167,8 +165,8 @@ func TestKid_Patch(t *testing.T) {
 		k.Patch("/", nil)
 	})
 
-	k.Patch("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": "patch"})
+	k.Patch("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": "patch"})
 	})
 
 	assert.Equal(t, 1, len(k.router.routes))
@@ -193,8 +191,8 @@ func TestKid_Trace(t *testing.T) {
 		k.Trace("/", nil)
 	})
 
-	k.Trace("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": "trace"})
+	k.Trace("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": "trace"})
 	})
 
 	assert.Equal(t, 1, len(k.router.routes))
@@ -219,8 +217,8 @@ func TestKid_Connect(t *testing.T) {
 		k.Connect("/", nil)
 	})
 
-	k.Connect("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": "connect"})
+	k.Connect("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": "connect"})
 	})
 
 	assert.Equal(t, 1, len(k.router.routes))
@@ -245,8 +243,8 @@ func TestKid_Options(t *testing.T) {
 		k.Options("/", nil)
 	})
 
-	k.Options("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": "options"})
+	k.Options("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": "options"})
 	})
 
 	assert.Equal(t, 1, len(k.router.routes))
@@ -271,8 +269,8 @@ func TestKid_Head(t *testing.T) {
 		k.Head("/", nil)
 	})
 
-	k.Head("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": "head"})
+	k.Head("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": "head"})
 	})
 
 	assert.Equal(t, 1, len(k.router.routes))
@@ -297,8 +295,8 @@ func TestKid_Add(t *testing.T) {
 		k.Add("/", nil, []string{http.MethodGet, http.MethodPost})
 	})
 
-	k.Add("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
+	k.Add("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
 	}, []string{http.MethodGet, http.MethodPost})
 
 	assert.Equal(t, 1, len(k.router.routes))
@@ -333,8 +331,8 @@ func TestKid_Any(t *testing.T) {
 		k.Any("/", nil)
 	})
 
-	k.Any("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
+	k.Any("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
 	})
 
 	assert.Equal(t, 1, len(k.router.routes))
@@ -380,8 +378,8 @@ func TestKid_Group(t *testing.T) {
 	k := New()
 	g := k.Group("/v1")
 
-	g.Get("/path", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"message": "group"})
+	g.Get("/path", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"message": "group"})
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/v1/path", nil)
@@ -399,23 +397,23 @@ func TestKid_applyMiddlewaresToHandler(t *testing.T) {
 
 	middlewares := []MiddlewareFunc{
 		func(next HandlerFunc) HandlerFunc {
-			return func(c *Context) error {
+			return func(c *Context) {
 				c.Set("key1", 10)
-				return next(c)
+				next(c)
 			}
 		},
 		func(next HandlerFunc) HandlerFunc {
-			return func(c *Context) error {
+			return func(c *Context) {
 				c.Set("key2", 20)
-				return next(c)
+				next(c)
 			}
 		},
 	}
 
-	handler := k.applyMiddlewaresToHandler(func(c *Context) error {
+	handler := k.applyMiddlewaresToHandler(func(c *Context) {
 		val1, _ := c.Get("key1")
 		val2, _ := c.Get("key2")
-		return c.JSON(http.StatusOK, Map{"key1": val1, "key2": val2})
+		c.JSON(http.StatusOK, Map{"key1": val1, "key2": val2})
 	}, middlewares...)
 
 	req := httptest.NewRequest(http.MethodHead, "/test", nil)
@@ -424,9 +422,8 @@ func TestKid_applyMiddlewaresToHandler(t *testing.T) {
 	c := newContext(k)
 	c.reset(req, res)
 
-	err := handler(c)
+	handler(c)
 
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, res.Code)
 	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	assert.Equal(t, "{\"key1\":10,\"key2\":20}\n", res.Body.String())
@@ -460,29 +457,11 @@ func TestKid_ServeHTTP_MethodnotAllowed(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"Method Not Allowed\"}\n", res.Body.String())
 }
 
-func TestKid_ServeHTTP_ErrorReturnedByHandler(t *testing.T) {
-	k := New()
-
-	k.Get("/test", func(c *Context) error {
-		return errors.NewHTTPError(http.StatusForbidden)
-	})
-
-	req := httptest.NewRequest(http.MethodGet, "/test", nil)
-	res := httptest.NewRecorder()
-
-	k.ServeHTTP(res, req)
-
-	assert.Equal(t, http.StatusForbidden, res.Code)
-	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
-	assert.Equal(t, "{\"message\":\"Forbidden\"}\n", res.Body.String())
-}
-
 func TestKid_ServeHTTP_WriteStatusCodeIfNotWritten(t *testing.T) {
 	k := New()
 
-	k.Get("/test", func(c *Context) error {
+	k.Get("/test", func(c *Context) {
 		c.Response().WriteHeader(http.StatusCreated)
-		return nil
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
@@ -506,8 +485,8 @@ func TestKid_Debug(t *testing.T) {
 func TestKid_Run(t *testing.T) {
 	k := New()
 
-	k.Get("/", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"message": "healthy"})
+	k.Get("/", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"message": "healthy"})
 	})
 
 	go func() {
@@ -668,16 +647,11 @@ func TestApplyOptions(t *testing.T) {
 		k.ApplyOptions(nil)
 	})
 
-	handler := func(c *Context, err error) {
-	}
-
 	k.ApplyOptions(
 		WithDebug(true),
-		WithErrorHandler(handler),
 	)
 
 	assert.True(t, k.Debug())
-	assert.True(t, funcsAreEqual(handler, k.errorHandler))
 }
 
 func TestPanicIfNil(t *testing.T) {

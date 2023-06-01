@@ -12,8 +12,8 @@ func TestWrapHandler(t *testing.T) {
 	k1 := New()
 	k2 := New()
 
-	k2.Get("/test", func(c *Context) error {
-		return c.JSONByte(http.StatusOK, []byte(`{"status": "ok"}`))
+	k2.Get("/test", func(c *Context) {
+		c.JSONByte(http.StatusOK, []byte(`{"status": "ok"}`))
 	})
 
 	k1.Get("/test", WrapHandler(k2))

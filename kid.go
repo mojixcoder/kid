@@ -16,13 +16,10 @@ import (
 
 type (
 	// HandlerFunc is the type which serves HTTP requests.
-	HandlerFunc func(c *Context) error
+	HandlerFunc func(c *Context)
 
 	// MiddlewareFunc is the type of middlewares.
 	MiddlewareFunc func(next HandlerFunc) HandlerFunc
-
-	// ErrorHandler is the functions that handles errors when a handler returns an error.
-	ErrorHandler func(c *Context, err error)
 
 	// Map is a generic map to make it easier to send responses.
 	Map map[string]any
@@ -35,7 +32,6 @@ type (
 		middlewares             []MiddlewareFunc
 		notFoundHandler         HandlerFunc
 		methodNotAllowedHandler HandlerFunc
-		errorHandler            ErrorHandler
 		jsonSerializer          serializer.Serializer
 		xmlSerializer           serializer.Serializer
 		htmlRenderer            htmlrenderer.HTMLRenderer
@@ -61,7 +57,6 @@ func New() *Kid {
 		middlewares:             make([]MiddlewareFunc, 0),
 		notFoundHandler:         defaultNotFoundHandler,
 		methodNotAllowedHandler: defaultMethodNotAllowedHandler,
-		errorHandler:            defaultErrorHandler,
 		jsonSerializer:          serializer.NewJSONSerializer(),
 		xmlSerializer:           serializer.NewXMLSerializer(),
 		htmlRenderer:            htmlrenderer.Default(false),
@@ -219,9 +214,7 @@ func (k *Kid) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		handler = k.applyMiddlewaresToHandler(handler, k.middlewares...)
 	}
 
-	if err := handler(c); err != nil {
-		k.errorHandler(c, err)
-	}
+	handler(c)
 
 	if !c.Response().Written() {
 		c.Response().WriteHeaderNow()
