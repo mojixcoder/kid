@@ -53,15 +53,6 @@ func WithJSONSerializer(serializer serializer.Serializer) Option {
 	})
 }
 
-// WithErrorHandler configures Kid's error handler.
-func WithErrorHandler(errHandler ErrorHandler) Option {
-	panicIfNil(errHandler, "error handler cannot be nil")
-
-	return optionImpl(func(k *Kid) {
-		k.errorHandler = errHandler
-	})
-}
-
 // WithNotFoundHandler configures Kid's not found handler.
 func WithNotFoundHandler(handler HandlerFunc) Option {
 	panicIfNil(handler, "not found handler cannot be nil")

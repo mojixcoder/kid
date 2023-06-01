@@ -10,44 +10,44 @@ import (
 )
 
 func registerHandlers(g Group) {
-	g.Get("/path", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"method": c.Request().Method})
+	g.Get("/path", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"method": c.Request().Method})
 	})
 
-	g.Post("/path", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"method": c.Request().Method})
+	g.Post("/path", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"method": c.Request().Method})
 	})
 
-	g.Patch("/path", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"method": c.Request().Method})
+	g.Patch("/path", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"method": c.Request().Method})
 	})
 
-	g.Put("/path", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"method": c.Request().Method})
+	g.Put("/path", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"method": c.Request().Method})
 	})
 
-	g.Delete("/path", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"method": c.Request().Method})
+	g.Delete("/path", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"method": c.Request().Method})
 	})
 
-	g.Connect("/path", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"method": c.Request().Method})
+	g.Connect("/path", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"method": c.Request().Method})
 	})
 
-	g.Trace("/path", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"method": c.Request().Method})
+	g.Trace("/path", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"method": c.Request().Method})
 	})
 
-	g.Options("/path", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"method": c.Request().Method})
+	g.Options("/path", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"method": c.Request().Method})
 	})
 
-	g.Head("/path", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"method": c.Request().Method})
+	g.Head("/path", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"method": c.Request().Method})
 	})
 
-	g.Any("/any", func(c *Context) error {
-		return c.JSON(http.StatusOK, Map{"method": c.Request().Method})
+	g.Any("/any", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"method": c.Request().Method})
 	})
 }
 
@@ -96,8 +96,8 @@ func TestGroup_Add(t *testing.T) {
 		g.Add("/", nil, []string{http.MethodGet, http.MethodPost})
 	})
 
-	g.Add("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
+	g.Add("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
 	}, []string{http.MethodGet, http.MethodPost})
 
 	assert.Equal(t, 1, len(k.router.routes))
@@ -184,12 +184,12 @@ func TestGroup_Add_NestedGroups(t *testing.T) {
 	g := newGroup(k, "/v1")
 	nestedG := g.Group("/api")
 
-	g.Add("/test", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
+	g.Add("/test", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
 	}, []string{http.MethodPost})
 
-	nestedG.Add("/{var}", func(c *Context) error {
-		return c.JSON(http.StatusCreated, Map{"message": c.Param("var")})
+	nestedG.Add("/{var}", func(c *Context) {
+		c.JSON(http.StatusCreated, Map{"message": c.Param("var")})
 	}, []string{http.MethodPost})
 
 	testCases := []struct {

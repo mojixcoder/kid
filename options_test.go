@@ -75,22 +75,6 @@ func TestWithJSONSerializer(t *testing.T) {
 	assert.Equal(t, serializer, k.jsonSerializer)
 }
 
-func TestWithErrorHandler(t *testing.T) {
-	k := New()
-
-	assert.PanicsWithValue(t, "error handler cannot be nil", func() {
-		WithErrorHandler(nil)
-	})
-
-	hanlder := func(c *Context, err error) {
-	}
-
-	opt := WithErrorHandler(hanlder)
-	opt.apply(k)
-
-	assert.True(t, funcsAreEqual(hanlder, k.errorHandler))
-}
-
 func TestWithNotFoundHandler(t *testing.T) {
 	k := New()
 
@@ -98,9 +82,7 @@ func TestWithNotFoundHandler(t *testing.T) {
 		WithNotFoundHandler(nil)
 	})
 
-	hanlder := func(c *Context) error {
-		return nil
-	}
+	hanlder := func(c *Context) {}
 
 	opt := WithNotFoundHandler(hanlder)
 	opt.apply(k)
@@ -115,9 +97,7 @@ func TestWithMethodNotAllowedHandler(t *testing.T) {
 		WithMethodNotAllowedHandler(nil)
 	})
 
-	hanlder := func(c *Context) error {
-		return nil
-	}
+	hanlder := func(c *Context) {}
 
 	opt := WithMethodNotAllowedHandler(hanlder)
 	opt.apply(k)

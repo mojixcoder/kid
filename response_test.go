@@ -73,10 +73,9 @@ func TestResponseWriter_Written(t *testing.T) {
 func TestResponseWriter_Flush(t *testing.T) {
 	k := New()
 
-	k.Get("/", func(c *Context) error {
+	k.Get("/", func(c *Context) {
 		c.Response().WriteHeader(http.StatusBadGateway)
 		c.Response().Flush()
-		return nil
 	})
 
 	srv := httptest.NewServer(k)
