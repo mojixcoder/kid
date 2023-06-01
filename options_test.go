@@ -13,9 +13,7 @@ func (*mockEverything) RenderHTML(res http.ResponseWriter, path string, data any
 	return nil
 }
 
-func (*mockEverything) Write(w http.ResponseWriter, in any, indent string) error {
-	return nil
-}
+func (*mockEverything) Write(w http.ResponseWriter, in any, indent string) {}
 
 func (*mockEverything) Read(req *http.Request, out any) error {
 	return nil

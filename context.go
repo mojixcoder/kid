@@ -79,31 +79,28 @@ func (c *Context) QueryParams() url.Values {
 }
 
 // JSON sends JSON response with the given status code.
-//
-// Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) JSON(code int, obj any) error {
+func (c *Context) JSON(code int, obj any) {
 	c.writeContentType("application/json")
 	c.response.WriteHeader(code)
-	return c.kid.jsonSerializer.Write(c.Response(), obj, "")
+	c.kid.jsonSerializer.Write(c.Response(), obj, "")
 }
 
 // JSONIndent sends JSON response with the given status code.
 // Sends response with the given indent.
-//
-// Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) JSONIndent(code int, obj any, indent string) error {
+func (c *Context) JSONIndent(code int, obj any, indent string) {
 	c.writeContentType("application/json")
 	c.response.WriteHeader(code)
-	return c.kid.jsonSerializer.Write(c.Response(), obj, indent)
+	c.kid.jsonSerializer.Write(c.Response(), obj, indent)
 }
 
 // JSONByte sends JSON response with the given status code.
 // Writes JSON blob untouched to response.
-func (c *Context) JSONByte(code int, blob []byte) error {
+func (c *Context) JSONByte(code int, blob []byte) {
 	c.writeContentType("application/json")
 	c.response.WriteHeader(code)
-	_, err := c.Response().Write(blob)
-	return err
+	if _, err := c.Response().Write(blob); err != nil {
+		panic(err)
+	}
 }
 
 // ReadJSON reads request's body as JSON and stores it in the given object.
@@ -115,29 +112,28 @@ func (c *Context) ReadJSON(out any) error {
 // XML sends XML response with the given status code.
 //
 // Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) XML(code int, obj any) error {
+func (c *Context) XML(code int, obj any) {
 	c.writeContentType("application/xml")
 	c.response.WriteHeader(code)
-	return c.kid.xmlSerializer.Write(c.Response(), obj, "")
+	c.kid.xmlSerializer.Write(c.Response(), obj, "")
 }
 
 // XMLIndent sends XML response with the given status code.
 // Sends response with the given indent.
-//
-// Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) XMLIndent(code int, obj any, indent string) error {
+func (c *Context) XMLIndent(code int, obj any, indent string) {
 	c.writeContentType("application/xml")
 	c.response.WriteHeader(code)
-	return c.kid.xmlSerializer.Write(c.Response(), obj, indent)
+	c.kid.xmlSerializer.Write(c.Response(), obj, indent)
 }
 
 // XMLByte sends XML response with the given status code.
 // Writes JSON blob untouched to response.
-func (c *Context) XMLByte(code int, blob []byte) error {
+func (c *Context) XMLByte(code int, blob []byte) {
 	c.writeContentType("application/xml")
 	c.response.WriteHeader(code)
-	_, err := c.Response().Write(blob)
-	return err
+	if _, err := c.Response().Write(blob); err != nil {
+		panic(err)
+	}
 }
 
 // ReadXML reads request's body as XML and stores it in the given object.

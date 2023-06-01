@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mojixcoder/kid/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,27 +23,18 @@ func TestDefaultXMLSerializer_Write(t *testing.T) {
 
 	p := person{Name: "Mojix", Age: 22}
 
-	err := serializer.Write(res, p, "")
-
-	assert.NoError(t, err)
+	serializer.Write(res, p, "")
 	assert.Equal(t, "<person><name>Mojix</name><age>22</age></person>", res.Body.String())
 
 	res = httptest.NewRecorder()
 
-	err = serializer.Write(res, p, "    ")
-
-	assert.NoError(t, err)
+	serializer.Write(res, p, "    ")
 	assert.Equal(t, "<person>\n    <name>Mojix</name>\n    <age>22</age>\n</person>", res.Body.String())
 
 	// Unsupported type.
-	err = serializer.Write(res, make(chan bool), "")
-	assert.Error(t, err)
-
-	httpErr := err.(*errors.HTTPError)
-
-	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(t, httpErr.Err.Error(), httpErr.Message)
-	assert.Error(t, httpErr.Err)
+	assert.Panics(t, func() {
+		serializer.Write(res, make(chan bool), "")
+	})
 }
 
 func TestDefaultXMLSerializer_Read(t *testing.T) {
@@ -61,25 +51,15 @@ func TestDefaultXMLSerializer_Read(t *testing.T) {
 
 	req = httptest.NewRequest(http.MethodGet, "/", strings.NewReader("<person><name>Mojix</name><age>22</age></person>"))
 
-	// Invalid argument passed to unmarshal.
 	var p2 person
-	err = serializer.Read(req, p2)
-	assert.Error(t, err)
 
-	httpErr := err.(*errors.HTTPError)
-
-	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(t, httpErr.Err.Error(), httpErr.Message)
-	assert.Error(t, httpErr.Err)
+	// Invalid argument passed to unmarshal.
+	assert.Panics(t, func() {
+		serializer.Read(req, p2)
+	})
 
 	req = httptest.NewRequest(http.MethodGet, "/", strings.NewReader("<person><name>Mojix</name><age>22.5</age></person>"))
 
 	err = serializer.Read(req, &p2)
 	assert.Error(t, err)
-
-	httpErr = err.(*errors.HTTPError)
-
-	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
-	assert.Equal(t, httpErr.Err.Error(), httpErr.Message)
-	assert.Error(t, httpErr.Err)
 }

@@ -3,6 +3,7 @@ package kid
 import (
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -11,10 +12,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mojixcoder/kid/errors"
 	htmlrenderer "github.com/mojixcoder/kid/html_renderer"
 	"github.com/stretchr/testify/assert"
 )
+
+type errWriter struct {
+	*httptest.ResponseRecorder
+}
+
+func (errWriter) Write(blob []byte) (int, error) {
+	return 0, errors.New("new err")
+}
 
 type person struct {
 	Name string `json:"name" xml:"name"`
@@ -238,11 +246,9 @@ func TestContext_ReadJSON(t *testing.T) {
 	ctx.reset(req, res)
 
 	var p2 person
-	httpErr := ctx.ReadJSON(&p2).(*errors.HTTPError)
+	err = ctx.ReadJSON(&p2)
 
-	assert.Error(t, httpErr)
-	assert.Error(t, httpErr.Err)
-	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+	assert.Error(t, err)
 }
 
 func TestContext_JSON(t *testing.T) {
@@ -253,9 +259,8 @@ func TestContext_JSON(t *testing.T) {
 	ctx.reset(nil, res)
 
 	p := person{Name: "foo", Age: 1999}
-	err := ctx.JSON(http.StatusCreated, &p)
+	ctx.JSON(http.StatusCreated, &p)
 
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, res.Code)
 	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	assert.Equal(t, "{\"name\":\"foo\",\"age\":1999}\n", res.Body.String())
@@ -264,11 +269,9 @@ func TestContext_JSON(t *testing.T) {
 
 	ctx.reset(nil, res)
 
-	httpErr := ctx.JSON(http.StatusCreated, make(chan bool)).(*errors.HTTPError)
-
-	assert.Error(t, httpErr)
-	assert.Error(t, httpErr.Err)
-	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
+	assert.Panics(t, func() {
+		ctx.JSON(http.StatusCreated, make(chan bool))
+	})
 }
 
 func TestContext_JSONIndent(t *testing.T) {
@@ -279,9 +282,8 @@ func TestContext_JSONIndent(t *testing.T) {
 	ctx.reset(nil, res)
 
 	p := person{Name: "foo", Age: 1999}
-	err := ctx.JSONIndent(http.StatusCreated, &p, "    ")
+	ctx.JSONIndent(http.StatusCreated, &p, "    ")
 
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, res.Code)
 	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	assert.Equal(t, "{\n    \"name\": \"foo\",\n    \"age\": 1999\n}\n", res.Body.String())
@@ -290,11 +292,9 @@ func TestContext_JSONIndent(t *testing.T) {
 
 	ctx.reset(nil, res)
 
-	httpErr := ctx.JSONIndent(http.StatusCreated, make(chan bool), "    ").(*errors.HTTPError)
-
-	assert.Error(t, httpErr)
-	assert.Error(t, httpErr.Err)
-	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
+	assert.Panics(t, func() {
+		ctx.JSONIndent(http.StatusCreated, make(chan bool), "    ")
+	})
 }
 
 func TestContext_JSONByte(t *testing.T) {
@@ -309,12 +309,17 @@ func TestContext_JSONByte(t *testing.T) {
 	blob, err := json.Marshal(p)
 	assert.NoError(t, err)
 
-	err = ctx.JSONByte(http.StatusOK, blob)
+	ctx.JSONByte(http.StatusOK, blob)
 
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, res.Code)
 	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	assert.Equal(t, "{\"name\":\"foo\",\"age\":1999}", res.Body.String())
+
+	ctx.reset(nil, errWriter{res})
+
+	assert.Panics(t, func() {
+		ctx.JSONByte(http.StatusOK, blob)
+	})
 }
 
 func TestContext_ReadXML(t *testing.T) {
@@ -335,11 +340,9 @@ func TestContext_ReadXML(t *testing.T) {
 	ctx.reset(req, nil)
 
 	var p2 person
-	httpErr := ctx.ReadXML(&p2).(*errors.HTTPError)
+	err = ctx.ReadXML(&p2)
 
-	assert.Error(t, httpErr)
-	assert.Error(t, httpErr.Err)
-	assert.Equal(t, http.StatusBadRequest, httpErr.Code)
+	assert.Error(t, err)
 }
 
 func TestContext_XML(t *testing.T) {
@@ -350,9 +353,8 @@ func TestContext_XML(t *testing.T) {
 	ctx.reset(nil, res)
 
 	p := person{Name: "foo", Age: 1999}
-	err := ctx.XML(http.StatusCreated, &p)
+	ctx.XML(http.StatusCreated, &p)
 
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, res.Code)
 	assert.Equal(t, "application/xml", res.Header().Get("Content-Type"))
 	assert.Equal(t, "<person><name>foo</name><age>1999</age></person>", res.Body.String())
@@ -361,11 +363,9 @@ func TestContext_XML(t *testing.T) {
 
 	ctx.reset(nil, res)
 
-	httpErr := ctx.XML(http.StatusCreated, make(chan bool)).(*errors.HTTPError)
-
-	assert.Error(t, httpErr)
-	assert.Error(t, httpErr.Err)
-	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
+	assert.Panics(t, func() {
+		ctx.XML(http.StatusCreated, make(chan bool))
+	})
 }
 
 func TestContext_XMLIndent(t *testing.T) {
@@ -376,9 +376,8 @@ func TestContext_XMLIndent(t *testing.T) {
 	ctx.reset(nil, res)
 
 	p := person{Name: "foo", Age: 1999}
-	err := ctx.XMLIndent(http.StatusCreated, &p, "    ")
+	ctx.XMLIndent(http.StatusCreated, &p, "    ")
 
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusCreated, res.Code)
 	assert.Equal(t, "application/xml", res.Header().Get("Content-Type"))
 	assert.Equal(t, "<person>\n    <name>foo</name>\n    <age>1999</age>\n</person>", res.Body.String())
@@ -387,11 +386,9 @@ func TestContext_XMLIndent(t *testing.T) {
 
 	ctx.reset(nil, res)
 
-	httpErr := ctx.XMLIndent(http.StatusCreated, make(chan bool), "    ").(*errors.HTTPError)
-
-	assert.Error(t, httpErr)
-	assert.Error(t, httpErr.Err)
-	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
+	assert.Panics(t, func() {
+		ctx.XMLIndent(http.StatusCreated, make(chan bool), "    ")
+	})
 }
 
 func TestContext_XMLByte(t *testing.T) {
@@ -406,12 +403,17 @@ func TestContext_XMLByte(t *testing.T) {
 	blob, err := xml.Marshal(p)
 	assert.NoError(t, err)
 
-	err = ctx.XMLByte(http.StatusOK, blob)
+	ctx.XMLByte(http.StatusOK, blob)
 
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, res.Code)
 	assert.Equal(t, "application/xml", res.Header().Get("Content-Type"))
 	assert.Equal(t, "<person><name>foo</name><age>1999</age></person>", res.Body.String())
+
+	ctx.reset(nil, errWriter{res})
+
+	assert.Panics(t, func() {
+		ctx.XMLByte(http.StatusOK, blob)
+	})
 }
 
 func TestContext_HTML(t *testing.T) {
