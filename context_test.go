@@ -427,7 +427,7 @@ func TestContext_HTML(t *testing.T) {
 	res := httptest.NewRecorder()
 	ctx.reset(nil, res)
 
-	err := ctx.HTML(http.StatusAccepted, "index.html", nil)
+	ctx.HTML(http.StatusAccepted, "index.html", nil)
 
 	newLine := getNewLineStr()
 	expectedRes := fmt.Sprintf(
@@ -435,7 +435,6 @@ func TestContext_HTML(t *testing.T) {
 		newLine, newLine, newLine, newLine,
 	)
 
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusAccepted, res.Code)
 	assert.Equal(t, expectedRes, res.Body.String())
 	assert.Equal(t, "text/html", res.Header().Get("Content-Type"))
@@ -447,11 +446,15 @@ func TestContext_HTMLString(t *testing.T) {
 	res := httptest.NewRecorder()
 	ctx.reset(nil, res)
 
-	err := ctx.HTMLString(http.StatusAccepted, "<p>Hello</p>")
+	ctx.HTMLString(http.StatusAccepted, "<p>Hello</p>")
 
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusAccepted, res.Code)
 	assert.Equal(t, "<p>Hello</p>", res.Body.String())
 	assert.Equal(t, "text/html", res.Header().Get("Content-Type"))
 
+	ctx.reset(nil, errWriter{res})
+
+	assert.Panics(t, func() {
+		ctx.HTMLString(http.StatusAccepted, "<p>Hello</p>")
+	})
 }

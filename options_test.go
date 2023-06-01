@@ -9,9 +9,7 @@ import (
 
 type mockEverything struct{}
 
-func (*mockEverything) RenderHTML(res http.ResponseWriter, path string, data any) error {
-	return nil
-}
+func (*mockEverything) RenderHTML(res http.ResponseWriter, path string, data any) {}
 
 func (*mockEverything) Write(w http.ResponseWriter, in any, indent string) {}
 

@@ -146,22 +146,19 @@ func (c *Context) ReadXML(out any) error {
 //
 // tpl must be a relative path to templates root directory.
 // Defaults to "templates/".
-//
-// Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) HTML(code int, tpl string, data any) error {
+func (c *Context) HTML(code int, tpl string, data any) {
 	c.writeContentType("text/html")
 	c.response.WriteHeader(code)
-	return c.kid.htmlRenderer.RenderHTML(c.Response(), tpl, data)
+	c.kid.htmlRenderer.RenderHTML(c.Response(), tpl, data)
 }
 
 // HTMLString sends bare string as HTML response with the given status code.
-//
-// Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) HTMLString(code int, tpl string) error {
+func (c *Context) HTMLString(code int, tpl string) {
 	c.writeContentType("text/html")
 	c.response.WriteHeader(code)
-	_, err := c.Response().Write([]byte(tpl))
-	return err
+	if _, err := c.Response().Write([]byte(tpl)); err != nil {
+		panic(err)
+	}
 }
 
 // NoContent returns an empty response with the given status code.

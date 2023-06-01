@@ -70,18 +70,17 @@ func (r *defaultHTMLRenderer) AddFunc(name string, f any) {
 }
 
 // RenderHTML implements Kid's HTML renderer.
-func (r *defaultHTMLRenderer) RenderHTML(res http.ResponseWriter, path string, data any) error {
+func (r *defaultHTMLRenderer) RenderHTML(res http.ResponseWriter, path string, data any) {
 	if err := r.loadTemplates(); err != nil {
-		return err
+		panic(err)
 	}
 
 	if tpl, ok := r.templates[path]; !ok {
-		return ErrTemplateNotFound
+		panic(ErrTemplateNotFound)
 	} else {
 		if err := tpl.Execute(res, data); err != nil {
-			return err
+			panic(err)
 		}
-		return nil
 	}
 }
 

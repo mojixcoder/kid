@@ -157,24 +157,23 @@ func TestDefaultHTMLRenderer_RenderHTML(t *testing.T) {
 
 	res := httptest.NewRecorder()
 
-	err := htmlRenderer.RenderHTML(res, "index.html", nil)
-	assert.Error(t, err)
+	assert.Panics(t, func() {
+		htmlRenderer.RenderHTML(res, "index.html", nil)
+	})
 
 	htmlRenderer = newTestHTMLRenderer()
 	htmlRenderer.AddFunc("greet", func(name string) string {
 		return "Hello " + name
 	})
 
-	err = htmlRenderer.RenderHTML(res, "doesn't_exists.html", nil)
-
-	assert.Error(t, err)
-	assert.ErrorIs(t, ErrTemplateNotFound, err)
+	assert.PanicsWithError(t, ErrTemplateNotFound.Error(), func() {
+		htmlRenderer.RenderHTML(res, "doesn't_exists.html", nil)
+	})
 
 	newline := getNewLineStr()
 
 	res = httptest.NewRecorder()
-	err = htmlRenderer.RenderHTML(res, "index.html", nil)
-	assert.NoError(t, err)
+	htmlRenderer.RenderHTML(res, "index.html", nil)
 	assert.Equal(
 		t,
 		fmt.Sprintf("%s<html><body>%s<p>content</p>%s</body></html>%s", newline, newline, newline, newline),
@@ -182,16 +181,14 @@ func TestDefaultHTMLRenderer_RenderHTML(t *testing.T) {
 	)
 
 	res = httptest.NewRecorder()
-	err = htmlRenderer.RenderHTML(res, "pages/page.html", map[string]string{"key": "page contents"})
-	assert.NoError(t, err)
+	htmlRenderer.RenderHTML(res, "pages/page.html", map[string]string{"key": "page contents"})
 	assert.Equal(t,
 		fmt.Sprintf("%s<html><body>%s<p>page contents</p>%s</body></html>%s", newline, newline, newline, newline),
 		res.Body.String(),
 	)
 
 	res = httptest.NewRecorder()
-	err = htmlRenderer.RenderHTML(res, "pages/page2.html", nil)
-	assert.NoError(t, err)
+	htmlRenderer.RenderHTML(res, "pages/page2.html", nil)
 	assert.Equal(t,
 		fmt.Sprintf("%s<html><body>%s<p>Hello Tom</p>%s</body></html>%s", newline, newline, newline, newline),
 		res.Body.String(),
