@@ -45,13 +45,15 @@ func NewRecoveryWithConfig(cfg RecoveryConfig) kid.MiddlewareFunc {
 		return func(c *kid.Context) {
 			defer func() {
 				if err := recover(); err != nil {
-					if cfg.LogRecovers && c.Debug() {
-						fmt.Fprintf(cfg.Writer, "[RECOVERY] panic recovered: %v\n", err)
-					}
+					if c.Debug() {
+						if cfg.LogRecovers {
+							fmt.Fprintf(cfg.Writer, "[RECOVERY] panic recovered: %v\n", err)
+						}
 
-					if cfg.PrintStacktrace && c.Debug() {
-						stack := debug.Stack()
-						fmt.Fprintf(cfg.Writer, "%s", string(stack))
+						if cfg.PrintStacktrace {
+							stack := debug.Stack()
+							fmt.Fprintf(cfg.Writer, "%s", string(stack))
+						}
 					}
 
 					if cfg.OnRecovery != nil {
