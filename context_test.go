@@ -457,3 +457,12 @@ func TestContext_HTMLString(t *testing.T) {
 	assert.Equal(t, "<p>Hello</p>", res.Body.String())
 	assert.Equal(t, "text/html", res.Header().Get("Content-Type"))
 }
+
+func TestContext_Debug(t *testing.T) {
+	k := New()
+	k.debug = true
+
+	ctx := newContext(k)
+
+	assert.True(t, ctx.Debug())
+}

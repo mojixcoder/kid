@@ -22,6 +22,9 @@ type (
 
 		// Written returns true if response has already been written otherwise returns false.
 		Written() bool
+
+		// Status returns the status code.
+		Status() int
 	}
 
 	// response implements ResponseWriter.
@@ -83,6 +86,11 @@ func (r *response) Size() int {
 // Written returns true if response has already been written otherwise returns false.
 func (r *response) Written() bool {
 	return r.written
+}
+
+// Status returns the status code.
+func (r *response) Status() int {
+	return r.status
 }
 
 // Flush implements the http.Flusher interface.

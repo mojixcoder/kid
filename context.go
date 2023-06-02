@@ -194,3 +194,8 @@ func (c *Context) Get(key string) (any, bool) {
 	val, ok := c.storage[key]
 	return val, ok
 }
+
+// Debug returns whether we are in debug mode or not.
+func (c *Context) Debug() bool {
+	return c.kid.Debug()
+}
