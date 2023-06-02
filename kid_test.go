@@ -694,3 +694,11 @@ func TestPanicIfNil(t *testing.T) {
 		panicIfNil(x, "")
 	})
 }
+
+func TestKid_NewContext(t *testing.T) {
+	k := New()
+
+	ctx := k.NewContext(nil, nil)
+
+	assert.NotNil(t, ctx)
+}

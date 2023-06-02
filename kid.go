@@ -236,6 +236,13 @@ func (k *Kid) Debug() bool {
 	return k.debug
 }
 
+// NewContext basically is a helper function and can be used in testing.
+func (k *Kid) NewContext(req *http.Request, res http.ResponseWriter) *Context {
+	ctx := newContext(k)
+	ctx.reset(req, res)
+	return ctx
+}
+
 // ApplyOptions applies the given options.
 func (k *Kid) ApplyOptions(opts ...Option) {
 	for _, opt := range opts {

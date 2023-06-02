@@ -95,3 +95,12 @@ func TestResponseWriter_Hijack(t *testing.T) {
 	})
 	assert.True(t, res.Written())
 }
+
+func TestResponseWriter_Status(t *testing.T) {
+	w := httptest.NewRecorder()
+	res := newResponse(w).(*response)
+
+	res.WriteHeader(http.StatusAccepted)
+
+	assert.Equal(t, http.StatusAccepted, res.Status())
+}
