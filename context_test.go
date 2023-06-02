@@ -251,6 +251,23 @@ func TestContext_ReadJSON(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestContext_mustWrite(t *testing.T) {
+	ctx := newContext(New())
+
+	res := httptest.NewRecorder()
+	ctx.reset(nil, res)
+
+	ctx.mustWrite([]byte("byte"))
+
+	assert.Equal(t, "byte", res.Body.String())
+
+	ctx.reset(nil, errWriter{res})
+
+	assert.Panics(t, func() {
+		ctx.mustWrite([]byte("byte"))
+	})
+}
+
 func TestContext_JSON(t *testing.T) {
 	ctx := newContext(New())
 
@@ -314,12 +331,6 @@ func TestContext_JSONByte(t *testing.T) {
 	assert.Equal(t, http.StatusOK, res.Code)
 	assert.Equal(t, "application/json", res.Header().Get("Content-Type"))
 	assert.Equal(t, "{\"name\":\"foo\",\"age\":1999}", res.Body.String())
-
-	ctx.reset(nil, errWriter{res})
-
-	assert.Panics(t, func() {
-		ctx.JSONByte(http.StatusOK, blob)
-	})
 }
 
 func TestContext_ReadXML(t *testing.T) {
@@ -408,12 +419,6 @@ func TestContext_XMLByte(t *testing.T) {
 	assert.Equal(t, http.StatusOK, res.Code)
 	assert.Equal(t, "application/xml", res.Header().Get("Content-Type"))
 	assert.Equal(t, "<person><name>foo</name><age>1999</age></person>", res.Body.String())
-
-	ctx.reset(nil, errWriter{res})
-
-	assert.Panics(t, func() {
-		ctx.XMLByte(http.StatusOK, blob)
-	})
 }
 
 func TestContext_HTML(t *testing.T) {
@@ -451,10 +456,4 @@ func TestContext_HTMLString(t *testing.T) {
 	assert.Equal(t, http.StatusAccepted, res.Code)
 	assert.Equal(t, "<p>Hello</p>", res.Body.String())
 	assert.Equal(t, "text/html", res.Header().Get("Content-Type"))
-
-	ctx.reset(nil, errWriter{res})
-
-	assert.Panics(t, func() {
-		ctx.HTMLString(http.StatusAccepted, "<p>Hello</p>")
-	})
 }

@@ -78,6 +78,13 @@ func (c *Context) QueryParams() url.Values {
 	return c.request.URL.Query()
 }
 
+// mustWrite writes raw bytes to the response.
+func (c *Context) mustWrite(blob []byte) {
+	if _, err := c.Response().Write(blob); err != nil {
+		panic(err)
+	}
+}
+
 // JSON sends JSON response with the given status code.
 func (c *Context) JSON(code int, obj any) {
 	c.writeContentType("application/json")
@@ -98,9 +105,7 @@ func (c *Context) JSONIndent(code int, obj any, indent string) {
 func (c *Context) JSONByte(code int, blob []byte) {
 	c.writeContentType("application/json")
 	c.response.WriteHeader(code)
-	if _, err := c.Response().Write(blob); err != nil {
-		panic(err)
-	}
+	c.mustWrite(blob)
 }
 
 // ReadJSON reads request's body as JSON and stores it in the given object.
@@ -131,9 +136,7 @@ func (c *Context) XMLIndent(code int, obj any, indent string) {
 func (c *Context) XMLByte(code int, blob []byte) {
 	c.writeContentType("application/xml")
 	c.response.WriteHeader(code)
-	if _, err := c.Response().Write(blob); err != nil {
-		panic(err)
-	}
+	c.mustWrite(blob)
 }
 
 // ReadXML reads request's body as XML and stores it in the given object.
@@ -156,9 +159,7 @@ func (c *Context) HTML(code int, tpl string, data any) {
 func (c *Context) HTMLString(code int, tpl string) {
 	c.writeContentType("text/html")
 	c.response.WriteHeader(code)
-	if _, err := c.Response().Write([]byte(tpl)); err != nil {
-		panic(err)
-	}
+	c.mustWrite([]byte(tpl))
 }
 
 // NoContent returns an empty response with the given status code.
