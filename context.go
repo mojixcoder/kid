@@ -78,32 +78,34 @@ func (c *Context) QueryParams() url.Values {
 	return c.request.URL.Query()
 }
 
+// mustWrite writes raw bytes to the response.
+func (c *Context) mustWrite(blob []byte) {
+	if _, err := c.Response().Write(blob); err != nil {
+		panic(err)
+	}
+}
+
 // JSON sends JSON response with the given status code.
-//
-// Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) JSON(code int, obj any) error {
+func (c *Context) JSON(code int, obj any) {
 	c.writeContentType("application/json")
 	c.response.WriteHeader(code)
-	return c.kid.jsonSerializer.Write(c.Response(), obj, "")
+	c.kid.jsonSerializer.Write(c.Response(), obj, "")
 }
 
 // JSONIndent sends JSON response with the given status code.
 // Sends response with the given indent.
-//
-// Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) JSONIndent(code int, obj any, indent string) error {
+func (c *Context) JSONIndent(code int, obj any, indent string) {
 	c.writeContentType("application/json")
 	c.response.WriteHeader(code)
-	return c.kid.jsonSerializer.Write(c.Response(), obj, indent)
+	c.kid.jsonSerializer.Write(c.Response(), obj, indent)
 }
 
 // JSONByte sends JSON response with the given status code.
 // Writes JSON blob untouched to response.
-func (c *Context) JSONByte(code int, blob []byte) error {
+func (c *Context) JSONByte(code int, blob []byte) {
 	c.writeContentType("application/json")
 	c.response.WriteHeader(code)
-	_, err := c.Response().Write(blob)
-	return err
+	c.mustWrite(blob)
 }
 
 // ReadJSON reads request's body as JSON and stores it in the given object.
@@ -115,29 +117,26 @@ func (c *Context) ReadJSON(out any) error {
 // XML sends XML response with the given status code.
 //
 // Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) XML(code int, obj any) error {
+func (c *Context) XML(code int, obj any) {
 	c.writeContentType("application/xml")
 	c.response.WriteHeader(code)
-	return c.kid.xmlSerializer.Write(c.Response(), obj, "")
+	c.kid.xmlSerializer.Write(c.Response(), obj, "")
 }
 
 // XMLIndent sends XML response with the given status code.
 // Sends response with the given indent.
-//
-// Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) XMLIndent(code int, obj any, indent string) error {
+func (c *Context) XMLIndent(code int, obj any, indent string) {
 	c.writeContentType("application/xml")
 	c.response.WriteHeader(code)
-	return c.kid.xmlSerializer.Write(c.Response(), obj, indent)
+	c.kid.xmlSerializer.Write(c.Response(), obj, indent)
 }
 
 // XMLByte sends XML response with the given status code.
 // Writes JSON blob untouched to response.
-func (c *Context) XMLByte(code int, blob []byte) error {
+func (c *Context) XMLByte(code int, blob []byte) {
 	c.writeContentType("application/xml")
 	c.response.WriteHeader(code)
-	_, err := c.Response().Write(blob)
-	return err
+	c.mustWrite(blob)
 }
 
 // ReadXML reads request's body as XML and stores it in the given object.
@@ -150,22 +149,17 @@ func (c *Context) ReadXML(out any) error {
 //
 // tpl must be a relative path to templates root directory.
 // Defaults to "templates/".
-//
-// Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) HTML(code int, tpl string, data any) error {
+func (c *Context) HTML(code int, tpl string, data any) {
 	c.writeContentType("text/html")
 	c.response.WriteHeader(code)
-	return c.kid.htmlRenderer.RenderHTML(c.Response(), tpl, data)
+	c.kid.htmlRenderer.RenderHTML(c.Response(), tpl, data)
 }
 
 // HTMLString sends bare string as HTML response with the given status code.
-//
-// Returns an error if an error happened during sending response otherwise returns nil.
-func (c *Context) HTMLString(code int, tpl string) error {
+func (c *Context) HTMLString(code int, tpl string) {
 	c.writeContentType("text/html")
 	c.response.WriteHeader(code)
-	_, err := c.Response().Write([]byte(tpl))
-	return err
+	c.mustWrite([]byte(tpl))
 }
 
 // NoContent returns an empty response with the given status code.

@@ -3,14 +3,11 @@ package htmlrenderer
 
 import (
 	"errors"
-	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
 	"path/filepath"
 	"strings"
-
-	kiderrors "github.com/mojixcoder/kid/errors"
 )
 
 var (
@@ -73,18 +70,17 @@ func (r *defaultHTMLRenderer) AddFunc(name string, f any) {
 }
 
 // RenderHTML implements Kid's HTML renderer.
-func (r *defaultHTMLRenderer) RenderHTML(res http.ResponseWriter, path string, data any) error {
+func (r *defaultHTMLRenderer) RenderHTML(res http.ResponseWriter, path string, data any) {
 	if err := r.loadTemplates(); err != nil {
-		return newInternalServerHTTPError(err, err.Error())
+		panic(err)
 	}
 
 	if tpl, ok := r.templates[path]; !ok {
-		return newInternalServerHTTPError(ErrTemplateNotFound, fmt.Sprintf("template %s not found", path))
+		panic(ErrTemplateNotFound)
 	} else {
 		if err := tpl.Execute(res, data); err != nil {
-			return newInternalServerHTTPError(err, err.Error())
+			panic(err)
 		}
-		return nil
 	}
 }
 
@@ -126,7 +122,7 @@ func (r *defaultHTMLRenderer) loadTemplates() error {
 
 	templateFiles, layoutFiles, err := r.getTemplateAndLayoutFiles()
 	if err != nil {
-		return newInternalServerHTTPError(err, err.Error())
+		return err
 	}
 
 	for _, templateFile := range templateFiles {
@@ -167,9 +163,4 @@ func getFilesToParse(templatePath string, layouts []string) []string {
 	files = append(files, templatePath)
 	files = append(files, layouts...)
 	return files
-}
-
-// newInternalServerHTTPError returns a new HTTP error.
-func newInternalServerHTTPError(err error, msg any) error {
-	return kiderrors.NewHTTPError(http.StatusInternalServerError).WithError(err).WithMessage(msg)
 }

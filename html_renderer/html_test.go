@@ -3,12 +3,10 @@ package htmlrenderer
 import (
 	"fmt"
 	"html/template"
-	"net/http"
 	"net/http/httptest"
 	"path/filepath"
 	"testing"
 
-	"github.com/mojixcoder/kid/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -90,12 +88,9 @@ func TestDefaultHTMLRenderer_loadTemplates(t *testing.T) {
 	htmlRenderer := newTestHTMLRenderer()
 	htmlRenderer.rootDir = "invalid_path"
 
-	httpErr := htmlRenderer.loadTemplates().(*errors.HTTPError)
+	err := htmlRenderer.loadTemplates()
 
-	assert.Error(t, httpErr)
-	assert.Error(t, httpErr.Err)
-	assert.Equal(t, httpErr.Err.Error(), httpErr.Message)
-	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
+	assert.Error(t, err)
 	assert.False(t, htmlRenderer.isInitialized)
 
 	htmlRenderer = newTestHTMLRenderer()
@@ -103,7 +98,7 @@ func TestDefaultHTMLRenderer_loadTemplates(t *testing.T) {
 		return "Hello " + name
 	})
 
-	err := htmlRenderer.loadTemplates()
+	err = htmlRenderer.loadTemplates()
 
 	assert.NoError(t, err)
 	assert.True(t, htmlRenderer.isInitialized)
@@ -162,26 +157,23 @@ func TestDefaultHTMLRenderer_RenderHTML(t *testing.T) {
 
 	res := httptest.NewRecorder()
 
-	err := htmlRenderer.RenderHTML(res, "index.html", nil)
-	assert.Error(t, err)
+	assert.Panics(t, func() {
+		htmlRenderer.RenderHTML(res, "index.html", nil)
+	})
 
 	htmlRenderer = newTestHTMLRenderer()
 	htmlRenderer.AddFunc("greet", func(name string) string {
 		return "Hello " + name
 	})
 
-	httpErr := htmlRenderer.RenderHTML(res, "doesn't_exists.html", nil).(*errors.HTTPError)
-
-	assert.Error(t, httpErr)
-	assert.ErrorIs(t, ErrTemplateNotFound, httpErr.Err)
-	assert.Equal(t, "template doesn't_exists.html not found", httpErr.Message)
-	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
+	assert.PanicsWithError(t, ErrTemplateNotFound.Error(), func() {
+		htmlRenderer.RenderHTML(res, "doesn't_exists.html", nil)
+	})
 
 	newline := getNewLineStr()
 
 	res = httptest.NewRecorder()
-	err = htmlRenderer.RenderHTML(res, "index.html", nil)
-	assert.NoError(t, err)
+	htmlRenderer.RenderHTML(res, "index.html", nil)
 	assert.Equal(
 		t,
 		fmt.Sprintf("%s<html><body>%s<p>content</p>%s</body></html>%s", newline, newline, newline, newline),
@@ -189,28 +181,16 @@ func TestDefaultHTMLRenderer_RenderHTML(t *testing.T) {
 	)
 
 	res = httptest.NewRecorder()
-	err = htmlRenderer.RenderHTML(res, "pages/page.html", map[string]string{"key": "page contents"})
-	assert.NoError(t, err)
+	htmlRenderer.RenderHTML(res, "pages/page.html", map[string]string{"key": "page contents"})
 	assert.Equal(t,
 		fmt.Sprintf("%s<html><body>%s<p>page contents</p>%s</body></html>%s", newline, newline, newline, newline),
 		res.Body.String(),
 	)
 
 	res = httptest.NewRecorder()
-	err = htmlRenderer.RenderHTML(res, "pages/page2.html", nil)
-	assert.NoError(t, err)
+	htmlRenderer.RenderHTML(res, "pages/page2.html", nil)
 	assert.Equal(t,
 		fmt.Sprintf("%s<html><body>%s<p>Hello Tom</p>%s</body></html>%s", newline, newline, newline, newline),
 		res.Body.String(),
 	)
-}
-
-func TestNewInternalServerHTTPError(t *testing.T) {
-	err := errors.NewHTTPError(http.StatusBadRequest)
-	httpErr := newInternalServerHTTPError(err, err.Error()).(*errors.HTTPError)
-
-	assert.Error(t, httpErr)
-	assert.ErrorIs(t, httpErr.Err, err)
-	assert.Equal(t, http.StatusInternalServerError, httpErr.Code)
-	assert.Equal(t, err.Error(), httpErr.Message)
 }
