@@ -77,7 +77,7 @@ func NewCors() kid.MiddlewareFunc {
 
 // NewCorsWithConfig returns a new CORS middleware with the given config.
 func NewCorsWithConfig(cfg CorsConfig) kid.MiddlewareFunc {
-	setDefaults(&cfg)
+	setCorsDefaults(&cfg)
 
 	allowedMethods := strings.Join(cfg.AllowedMethods, ", ")
 	allowedHeaders := strings.Join(cfg.AllowedHeaders, ", ")
@@ -169,8 +169,8 @@ func setHeader(header http.Header, key, value, emptyValue string) {
 	}
 }
 
-// setDefaults sets the default CORS configs.
-func setDefaults(cfg *CorsConfig) {
+// setCorsDefaults sets the default CORS configs.
+func setCorsDefaults(cfg *CorsConfig) {
 	if len(cfg.AllowedOrigins) == 0 {
 		cfg.AllowedOrigins = DefaultCorsConfig.AllowedOrigins
 	}
