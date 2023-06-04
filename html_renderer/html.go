@@ -61,8 +61,8 @@ func Default(debug bool) *defaultHTMLRenderer {
 	)
 }
 
-// AddFunc adds a function to its func map.
-func (r *defaultHTMLRenderer) AddFunc(name string, f any) {
+// SetFunc sets a function in the func map.
+func (r *defaultHTMLRenderer) SetFunc(name string, f any) {
 	if f == nil {
 		panic("function cannot be nil")
 	}

@@ -53,14 +53,14 @@ func TestDefault(t *testing.T) {
 	assert.Empty(t, htmlRenderer.templates)
 }
 
-func TestDefaultHTMLRenderer_AddFunc(t *testing.T) {
+func TestDefaultHTMLRenderer_SetFunc(t *testing.T) {
 	htmlRenderer := Default(false)
 
 	assert.PanicsWithValue(t, "function cannot be nil", func() {
-		htmlRenderer.AddFunc("func1", nil)
+		htmlRenderer.SetFunc("func1", nil)
 	})
 
-	htmlRenderer.AddFunc("func1", func() {})
+	htmlRenderer.SetFunc("func1", func() {})
 
 	assert.Equal(t, 1, len(htmlRenderer.funcMap))
 }
@@ -103,7 +103,7 @@ func TestDefaultHTMLRenderer_loadTemplates(t *testing.T) {
 	assert.False(t, htmlRenderer.isInitialized)
 
 	htmlRenderer = newTestHTMLRenderer()
-	htmlRenderer.AddFunc("greet", func(name string) string {
+	htmlRenderer.SetFunc("greet", func(name string) string {
 		return "Hello " + name
 	})
 
@@ -171,7 +171,7 @@ func TestDefaultHTMLRenderer_RenderHTML(t *testing.T) {
 	})
 
 	htmlRenderer = newTestHTMLRenderer()
-	htmlRenderer.AddFunc("greet", func(name string) string {
+	htmlRenderer.SetFunc("greet", func(name string) string {
 		return "Hello " + name
 	})
 

@@ -424,7 +424,7 @@ func TestContext_XMLByte(t *testing.T) {
 func TestContext_HTML(t *testing.T) {
 	k := New()
 	renderer := htmlrenderer.New("testdata/templates/", "layouts/", ".html", false)
-	renderer.AddFunc("greet", func() int { return 1 })
+	renderer.SetFunc("greet", func() int { return 1 })
 	k.htmlRenderer = renderer
 
 	ctx := newContext(k)
