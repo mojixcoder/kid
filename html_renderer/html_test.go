@@ -1,6 +1,7 @@
 package htmlrenderer
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http/httptest"
@@ -9,6 +10,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+type errWriter struct {
+	*httptest.ResponseRecorder
+}
+
+func (errWriter) Write(blob []byte) (int, error) {
+	return 0, errors.New("new err")
+}
 
 func newTestHTMLRenderer() *defaultHTMLRenderer {
 	htmlRenderer := New("../testdata/templates/", "layouts/", ".html", false)
@@ -193,4 +202,8 @@ func TestDefaultHTMLRenderer_RenderHTML(t *testing.T) {
 		fmt.Sprintf("%s<html><body>%s<p>Hello Tom</p>%s</body></html>%s", newline, newline, newline, newline),
 		res.Body.String(),
 	)
+
+	assert.Panics(t, func() {
+		htmlRenderer.RenderHTML(errWriter{httptest.NewRecorder()}, "index.html", nil)
+	})
 }
