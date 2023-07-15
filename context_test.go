@@ -466,3 +466,71 @@ func TestContext_Debug(t *testing.T) {
 
 	assert.True(t, ctx.Debug())
 }
+
+func TestContext_String(t *testing.T) {
+	ctx := newContext(New())
+
+	res := httptest.NewRecorder()
+	ctx.reset(nil, res)
+
+	ctx.String(http.StatusAccepted, "hello")
+
+	assert.Equal(t, http.StatusAccepted, res.Code)
+	assert.Equal(t, "hello", res.Body.String())
+	assert.Equal(t, "text/plain", res.Header().Get("Content-Type"))
+}
+
+func TestContext_Byte(t *testing.T) {
+	ctx := newContext(New())
+
+	res := httptest.NewRecorder()
+	ctx.reset(nil, res)
+
+	ctx.Byte(http.StatusOK, []byte("mojix"))
+
+	assert.Equal(t, http.StatusOK, res.Code)
+	assert.Equal(t, "mojix", res.Body.String())
+	assert.Equal(t, "application/octet-stream", res.Header().Get("Content-Type"))
+}
+
+func TestContext_GetResponseHeader(t *testing.T) {
+	ctx := newContext(New())
+
+	res := httptest.NewRecorder()
+	res.Header().Set("key", "value")
+
+	ctx.reset(nil, res)
+
+	assert.Equal(t, "value", ctx.GetResponseHeader("key"))
+}
+
+func TestContext_SetResponseHeader(t *testing.T) {
+	ctx := newContext(New())
+
+	res := httptest.NewRecorder()
+	ctx.reset(nil, res)
+
+	ctx.SetResponseHeader("key", "value")
+	assert.Equal(t, "value", ctx.GetResponseHeader("key"))
+}
+
+func TestContext_GetRequestHeader(t *testing.T) {
+	ctx := newContext(New())
+
+	req := httptest.NewRequest(http.MethodGet, "/path", nil)
+	req.Header.Set("key", "value")
+
+	ctx.reset(req, nil)
+
+	assert.Equal(t, "value", ctx.GetRequestHeader("key"))
+}
+
+func TestContext_SetRequestHeader(t *testing.T) {
+	ctx := newContext(New())
+
+	req := httptest.NewRequest(http.MethodGet, "/path", nil)
+	ctx.reset(req, nil)
+
+	ctx.SetRequestHeader("key", "value")
+	assert.Equal(t, "value", ctx.GetRequestHeader("key"))
+}
