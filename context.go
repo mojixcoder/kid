@@ -162,19 +162,52 @@ func (c *Context) HTMLString(code int, tpl string) {
 	c.mustWrite([]byte(tpl))
 }
 
+// String sends bare string as a plain text response with the given status code.
+func (c *Context) String(code int, data string) {
+	c.writeContentType("text/plain")
+	c.response.WriteHeader(code)
+	c.mustWrite([]byte(data))
+}
+
+// Byte sends bare bytes as response with the given status code.
+func (c *Context) Byte(code int, data []byte) {
+	c.writeContentType("application/octet-stream")
+	c.response.WriteHeader(code)
+	c.mustWrite([]byte(data))
+}
+
 // NoContent returns an empty response with the given status code.
 func (c *Context) NoContent(code int) {
 	c.response.WriteHeader(code)
 	c.response.WriteHeaderNow()
 }
 
+// GetResponseHeader gets a response header.
+func (c *Context) GetResponseHeader(key string) string {
+	return c.response.Header().Get(key)
+}
+
+// SetResponseHeader sets a header to the response.
+func (c *Context) SetResponseHeader(key, value string) {
+	c.response.Header().Set(key, value)
+}
+
+// SetRequestHeader sets a header to the request.
+func (c *Context) SetRequestHeader(key, value string) {
+	c.request.Header.Set(key, value)
+}
+
+// GetRequestHeader gets a request header.
+func (c *Context) GetRequestHeader(key string) string {
+	return c.request.Header.Get(key)
+}
+
 // writeContentType sets content type header for response.
 // It won't overwrite content type if it's already set.
 func (c *Context) writeContentType(contentType string) {
 	contentTypeHeader := "Content-Type"
-	header := c.response.Header()
-	if header.Get(contentTypeHeader) == "" {
-		header.Set(contentTypeHeader, contentType)
+	if c.GetResponseHeader(contentTypeHeader) == "" {
+		c.SetResponseHeader(contentTypeHeader, contentType)
 	}
 }
 
