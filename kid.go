@@ -28,7 +28,7 @@ type (
 	//
 	// It's a framework instance.
 	Kid struct {
-		router                  Router
+		router                  Tree
 		middlewares             []MiddlewareFunc
 		notFoundHandler         HandlerFunc
 		methodNotAllowedHandler HandlerFunc
@@ -43,7 +43,7 @@ type (
 // Version of Kid.
 const Version string = "0.1.0"
 
-// allMethods is all of the HTTP methods.
+// allMethods is a list of all HTTP methods.
 var allMethods = []string{
 	http.MethodGet, http.MethodPost, http.MethodPut,
 	http.MethodPatch, http.MethodDelete, http.MethodHead,
@@ -53,7 +53,7 @@ var allMethods = []string{
 // New returns a new instance of Kid.
 func New() *Kid {
 	kid := Kid{
-		router:                  newRouter(),
+		router:                  newTree(),
 		middlewares:             make([]MiddlewareFunc, 0),
 		notFoundHandler:         defaultNotFoundHandler,
 		methodNotAllowedHandler: defaultMethodNotAllowedHandler,
@@ -94,70 +94,70 @@ func (k *Kid) Use(middleware MiddlewareFunc) {
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Get(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	k.router.add(path, handler, []string{http.MethodGet}, middlewares)
+	k.router.insertNode(path, []string{http.MethodGet}, middlewares, handler)
 }
 
 // Post registers a new handler for the given path for POST method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Post(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	k.router.add(path, handler, []string{http.MethodPost}, middlewares)
+	k.router.insertNode(path, []string{http.MethodPost}, middlewares, handler)
 }
 
 // Put registers a new handler for the given path for PUT method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Put(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	k.router.add(path, handler, []string{http.MethodPut}, middlewares)
+	k.router.insertNode(path, []string{http.MethodPut}, middlewares, handler)
 }
 
 // Patch registers a new handler for the given path for PATCH method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Patch(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	k.router.add(path, handler, []string{http.MethodPatch}, middlewares)
+	k.router.insertNode(path, []string{http.MethodPatch}, middlewares, handler)
 }
 
 // Delete registers a new handler for the given path for DELETE method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Delete(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	k.router.add(path, handler, []string{http.MethodDelete}, middlewares)
+	k.router.insertNode(path, []string{http.MethodDelete}, middlewares, handler)
 }
 
 // Head registers a new handler for the given path for HEAD method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Head(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	k.router.add(path, handler, []string{http.MethodHead}, middlewares)
+	k.router.insertNode(path, []string{http.MethodHead}, middlewares, handler)
 }
 
 // Options registers a new handler for the given path for OPTIONS method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Options(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	k.router.add(path, handler, []string{http.MethodOptions}, middlewares)
+	k.router.insertNode(path, []string{http.MethodOptions}, middlewares, handler)
 }
 
 // Connect registers a new handler for the given path for CONNECT method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Connect(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	k.router.add(path, handler, []string{http.MethodConnect}, middlewares)
+	k.router.insertNode(path, []string{http.MethodConnect}, middlewares, handler)
 }
 
 // Trace registers a new handler for the given path for TRACE method.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Trace(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	k.router.add(path, handler, []string{http.MethodTrace}, middlewares)
+	k.router.insertNode(path, []string{http.MethodTrace}, middlewares, handler)
 }
 
 // Any registers a new handler for the given path for all of the HTTP methods.
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Any(path string, handler HandlerFunc, middlewares ...MiddlewareFunc) {
-	k.router.add(path, handler, allMethods, middlewares)
+	k.router.insertNode(path, allMethods, middlewares, handler)
 }
 
 // Group creates a new router group.
@@ -172,7 +172,7 @@ func (k *Kid) Group(prefix string, middlewares ...MiddlewareFunc) Group {
 //
 // Specifying middlewares is optional. Middlewares will only be applied to this route.
 func (k *Kid) Add(path string, handler HandlerFunc, methods []string, middlewares ...MiddlewareFunc) {
-	k.router.add(path, handler, methods, middlewares)
+	k.router.insertNode(path, methods, middlewares, handler)
 }
 
 // Static registers a new route for serving static files.
@@ -188,10 +188,9 @@ func (k *Kid) Static(urlPath, staticRoot string, middlewares ...MiddlewareFunc) 
 func (k *Kid) StaticFS(urlPath string, fs http.FileSystem, middlewares ...MiddlewareFunc) {
 	fileServer := newFileServer(urlPath, fs)
 
-	methods := []string{http.MethodGet}
 	path := appendSlash(urlPath) + "{*filePath}"
 
-	k.router.add(path, WrapHandler(fileServer), methods, middlewares)
+	k.router.insertNode(path, []string{http.MethodGet}, middlewares, WrapHandler(fileServer))
 }
 
 // ServeHTTP implements the http.HandlerFunc interface.
@@ -199,7 +198,7 @@ func (k *Kid) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := k.pool.Get().(*Context)
 	c.reset(r, w)
 
-	route, params, err := k.router.find(getPath(r.URL), r.Method)
+	route, params, err := k.router.search(getPath(r.URL), r.Method)
 
 	c.setParams(params)
 

@@ -18,7 +18,7 @@ func TestNew(t *testing.T) {
 	k := New()
 
 	assert.NotNil(t, k)
-	assert.Equal(t, newRouter(), k.router)
+	assert.Equal(t, newTree(), k.router)
 	assert.Equal(t, 0, len(k.middlewares))
 	assert.Equal(t, serializer.NewJSONSerializer(), k.jsonSerializer)
 	assert.Equal(t, serializer.NewXMLSerializer(), k.xmlSerializer)
@@ -57,11 +57,6 @@ func TestKid_Get(t *testing.T) {
 		c.JSON(http.StatusOK, Map{"message": fmt.Sprintf("Hello %s", name)})
 	})
 
-	assert.Equal(t, 2, len(k.router.routes))
-	assert.Equal(t, 1, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t, http.MethodGet, k.router.routes[0].methods[0])
-
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
 	res := httptest.NewRecorder()
 
@@ -91,11 +86,6 @@ func TestKid_Post(t *testing.T) {
 		c.JSON(http.StatusCreated, Map{"message": "ok"})
 	})
 
-	assert.Equal(t, 1, len(k.router.routes))
-	assert.Equal(t, 1, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t, http.MethodPost, k.router.routes[0].methods[0])
-
 	req := httptest.NewRequest(http.MethodPost, "/test", nil)
 	res := httptest.NewRecorder()
 
@@ -116,11 +106,6 @@ func TestKid_Put(t *testing.T) {
 	k.Put("/test", func(c *Context) {
 		c.JSON(http.StatusCreated, Map{"message": "put"})
 	})
-
-	assert.Equal(t, 1, len(k.router.routes))
-	assert.Equal(t, 1, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t, http.MethodPut, k.router.routes[0].methods[0])
 
 	req := httptest.NewRequest(http.MethodPut, "/test", nil)
 	res := httptest.NewRecorder()
@@ -143,11 +128,6 @@ func TestKid_Delete(t *testing.T) {
 		c.JSON(http.StatusCreated, Map{"message": "deleted"})
 	})
 
-	assert.Equal(t, 1, len(k.router.routes))
-	assert.Equal(t, 1, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t, http.MethodDelete, k.router.routes[0].methods[0])
-
 	req := httptest.NewRequest(http.MethodDelete, "/test", nil)
 	res := httptest.NewRecorder()
 
@@ -168,11 +148,6 @@ func TestKid_Patch(t *testing.T) {
 	k.Patch("/test", func(c *Context) {
 		c.JSON(http.StatusCreated, Map{"message": "patch"})
 	})
-
-	assert.Equal(t, 1, len(k.router.routes))
-	assert.Equal(t, 1, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t, http.MethodPatch, k.router.routes[0].methods[0])
 
 	req := httptest.NewRequest(http.MethodPatch, "/test", nil)
 	res := httptest.NewRecorder()
@@ -195,11 +170,6 @@ func TestKid_Trace(t *testing.T) {
 		c.JSON(http.StatusCreated, Map{"message": "trace"})
 	})
 
-	assert.Equal(t, 1, len(k.router.routes))
-	assert.Equal(t, 1, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t, http.MethodTrace, k.router.routes[0].methods[0])
-
 	req := httptest.NewRequest(http.MethodTrace, "/test", nil)
 	res := httptest.NewRecorder()
 
@@ -220,11 +190,6 @@ func TestKid_Connect(t *testing.T) {
 	k.Connect("/test", func(c *Context) {
 		c.JSON(http.StatusCreated, Map{"message": "connect"})
 	})
-
-	assert.Equal(t, 1, len(k.router.routes))
-	assert.Equal(t, 1, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t, http.MethodConnect, k.router.routes[0].methods[0])
 
 	req := httptest.NewRequest(http.MethodConnect, "/test", nil)
 	res := httptest.NewRecorder()
@@ -247,11 +212,6 @@ func TestKid_Options(t *testing.T) {
 		c.JSON(http.StatusCreated, Map{"message": "options"})
 	})
 
-	assert.Equal(t, 1, len(k.router.routes))
-	assert.Equal(t, 1, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t, http.MethodOptions, k.router.routes[0].methods[0])
-
 	req := httptest.NewRequest(http.MethodOptions, "/test", nil)
 	res := httptest.NewRecorder()
 
@@ -273,11 +233,6 @@ func TestKid_Head(t *testing.T) {
 		c.JSON(http.StatusCreated, Map{"message": "head"})
 	})
 
-	assert.Equal(t, 1, len(k.router.routes))
-	assert.Equal(t, 1, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t, http.MethodHead, k.router.routes[0].methods[0])
-
 	req := httptest.NewRequest(http.MethodHead, "/test", nil)
 	res := httptest.NewRecorder()
 
@@ -298,11 +253,6 @@ func TestKid_Add(t *testing.T) {
 	k.Add("/test", func(c *Context) {
 		c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
 	}, []string{http.MethodGet, http.MethodPost})
-
-	assert.Equal(t, 1, len(k.router.routes))
-	assert.Equal(t, 2, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t, []string{http.MethodGet, http.MethodPost}, k.router.routes[0].methods)
 
 	testCases := []struct {
 		req            *http.Request
@@ -334,18 +284,6 @@ func TestKid_Any(t *testing.T) {
 	k.Any("/test", func(c *Context) {
 		c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
 	})
-
-	assert.Equal(t, 1, len(k.router.routes))
-	assert.Equal(t, 9, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t,
-		[]string{
-			http.MethodGet, http.MethodPost, http.MethodPut,
-			http.MethodPatch, http.MethodDelete, http.MethodHead,
-			http.MethodOptions, http.MethodConnect, http.MethodTrace,
-		},
-		k.router.routes[0].methods,
-	)
 
 	testCases := []struct {
 		req            *http.Request
