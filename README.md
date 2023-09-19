@@ -7,9 +7,11 @@ ___
 **Kid** is a micro web framework written in Go. It aims to keep its core simple and yet powerful. It's fully compatible with net/http interfaces and can be adapt with other net/http compatible packages as well.
 
 ### Routing
+___
 It uses a tree-based routing with a DFS traversal algorithm.
 
 ### Versioning
+___
 This package follows semver versioning.
 
 #### Quick Start
