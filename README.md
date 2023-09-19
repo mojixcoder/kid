@@ -12,7 +12,7 @@ ___
 
 ### Versioning
 ___
-This package follows semver versioning.
+This package follows [semver](https://semver.org/) versioning.
 
 #### Quick Start
 ___
