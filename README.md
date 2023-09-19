@@ -4,7 +4,13 @@
 
 ### Kid Micro Web Framework
 ___
-**Kid** is a micro web framework written in Go. It aims to keep its core simple and yet powerful.
+**Kid** is a micro web framework written in Go. It aims to keep its core simple and yet powerful. It's fully compatible with net/http interfaces and can be adapt with other net/http compatible packages as well.
+
+### Routing
+It uses a tree-based routing with a DFS traversal algorithm.
+
+### Versioning
+This package follows semver versioning.
 
 #### Quick Start
 ___
@@ -34,15 +40,3 @@ func helloHandler(c *kid.Context) {
     c.JSON(http.StatusOK, kid.Map{"message": "Hello Kid!"})
 }
 ```
-
-#### TODOs
-___
-
-- [x] Add test cases up to +90% coverage.
-- [ ] Complete docs.
-- [x] Add more methods for sending response like XML, HTML, etc.
-- [ ] Add some middlewares like `Logger`, `Recovery`, etc.
-- [x] Add CI.
-- [x] Add comments.
-- [x] Add methods to serve static files.
-- [ ] Add validator.
