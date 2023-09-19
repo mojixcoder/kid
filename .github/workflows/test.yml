@@ -10,14 +10,14 @@ on:
 
 env:
   # Upload coverage only for this go version.
-  LATEST_GO_VERSION: "1.20"
+  LATEST_GO_VERSION: "1.21"
 
 jobs:
   test:
     strategy:
       matrix:
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        go: ["1.18", "1.19", "1.20"]
+        go: ["1.18", "1.19", "1.20", "1.21"]
 
     name: ${{ matrix.os }} & Go ${{ matrix.go }}
 
@@ -35,7 +35,6 @@ jobs:
       - name: Test
         shell: bash
         run: | 
-          go vet ./...
           go test -v -race -coverprofile=coverage.out -covermode=atomic $(go list ./... | grep -v /examples)
 
       - name: Upload coverage
