@@ -297,8 +297,8 @@ func TestTree_search(t *testing.T) {
 		expectedParams     Params
 	}{
 		{name: "ok", method: http.MethodGet, path: "/path/test", expectedErr: nil, expectedParams: Params{}},
-		{name: "not_found", method: http.MethodGet, path: "/path/test2", expectedErr: errNotFound, expectedParams: nil},
-		{name: "method_not_allowed", method: http.MethodPost, path: "/path/test", expectedErr: errMethodNotAllowed, expectedParams: nil},
+		{name: "not_found", method: http.MethodGet, path: "/path/test2", expectedErr: errNotFound, expectedParams: Params{}},
+		{name: "method_not_allowed", method: http.MethodPost, path: "/path/test", expectedErr: errMethodNotAllowed, expectedParams: Params{}},
 	}
 
 	for _, tc := range testCases {

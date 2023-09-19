@@ -100,11 +100,6 @@ func TestGroup_Add(t *testing.T) {
 		c.JSON(http.StatusCreated, Map{"message": c.Request().Method})
 	}, []string{http.MethodGet, http.MethodPost})
 
-	assert.Equal(t, 1, len(k.router.routes))
-	assert.Equal(t, 2, len(k.router.routes[0].methods))
-	assert.Equal(t, 0, len(k.router.routes[0].middlewares))
-	assert.Equal(t, []string{http.MethodGet, http.MethodPost}, k.router.routes[0].methods)
-
 	testCases := []struct {
 		req            *http.Request
 		res            *httptest.ResponseRecorder

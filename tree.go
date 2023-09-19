@@ -1,6 +1,7 @@
 package kid
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"strings"
@@ -52,6 +53,9 @@ type (
 		// handlerMap maps HTTP methods to their handlers.
 		handlerMap map[string]handlerMiddleware
 	}
+
+	// Params is the type of path parameters.
+	Params map[string]string
 )
 
 // newNode returns a new node.
@@ -256,17 +260,43 @@ func (t Tree) search(path, method string) (handlerMiddleware, Params, error) {
 	visitedMap := map[uint32]bool{}
 	params := make(Params)
 
-	fmt.Println(segments)
-
 	hmMap, params, found := searchDFS(stack, visitedMap, params, segments, 0)
 
 	if !found {
-		return handlerMiddleware{}, nil, errNotFound
+		return handlerMiddleware{}, params, errNotFound
 	}
 
 	if hm, ok := hmMap[method]; ok {
 		return hm, params, nil
 	}
 
-	return handlerMiddleware{}, nil, errMethodNotAllowed
+	return handlerMiddleware{}, params, errMethodNotAllowed
+}
+
+// cleanPath normalizes the path.
+//
+// If soft is false it also removes duplicate slashes.
+func cleanPath(s string, soft bool) string {
+	if s == "" {
+		return "/"
+	}
+
+	if s[0] != '/' {
+		s = "/" + s
+	}
+
+	if soft {
+		return s
+	}
+
+	// Removing repeated slashes.
+	var buff bytes.Buffer
+	for i := 0; i < len(s); i++ {
+		if i != 0 && s[i] == '/' && s[i-1] == '/' {
+			continue
+		}
+		buff.WriteByte(s[i])
+	}
+
+	return buff.String()
 }
