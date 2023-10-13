@@ -1,6 +1,7 @@
 package kid
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -28,6 +29,7 @@ type (
 	//
 	// It's a framework instance.
 	Kid struct {
+		server                  *http.Server
 		router                  Tree
 		middlewares             []MiddlewareFunc
 		notFoundHandler         HandlerFunc
@@ -80,7 +82,14 @@ func (k *Kid) Run(address ...string) error {
 	k.printDebug(os.Stdout, "Starting server at %s\n", addr)
 	k.printDebug(os.Stdout, "Quit the server with CONTROL-C\n")
 
-	return http.ListenAndServe(addr, k)
+	k.server = &http.Server{Addr: addr, Handler: k}
+
+	return k.server.ListenAndServe()
+}
+
+// Shutdown gracefully shuts down the server without interrupting any active connections.
+func (k *Kid) Shutdown(ctx context.Context) error {
+	return k.server.Shutdown(ctx)
 }
 
 // Use registers a new middleware. The middleware will be applied to all of the routes.
