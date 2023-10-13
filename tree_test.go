@@ -215,11 +215,7 @@ func TestDFS(t *testing.T) {
 
 	for i, testCase := range testCases {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			stack := []*Node{tree.root}
-			vm := map[uint32]bool{}
-			params := make(Params)
-
-			hmMap, params, found := searchDFS(stack, vm, params, testCase.path, 0)
+			hmMap, params, found := tree.searchDFS(testCase.path)
 			hm, ok := hmMap[testCase.method]
 
 			assert.Equal(t, testCase.found, found)

@@ -39,7 +39,7 @@ type (
 
 	// Node is a tree node.
 	Node struct {
-		// id is the id of each node. It separates every node from each other.
+		// id of each node. It separates nodes from each other.
 		id uint32
 
 		// label of the node.
@@ -213,54 +213,61 @@ func isStar(label string) bool {
 }
 
 // searchDFS searches the tree with the DFS search algorithm.
-func searchDFS(
-	stack []*Node,
-	visitedMap map[uint32]bool,
-	params Params,
-	path []string,
-	pos int,
-) (map[string]handlerMiddleware, Params, bool) {
-	if len(stack) == 0 {
-		return nil, params, false
-	}
+func (t Tree) searchDFS(path []string) (map[string]handlerMiddleware, Params, bool) {
+	stack := []*Node{t.root}
+	visitedMap := map[uint32]bool{}
+	params := make(Params)
+	var pos int
 
-	node := stack[len(stack)-1] // accessing last element
+	// Search while stack is not empty.
+	for len(stack) != 0 {
+		// Accessing last element.
+		node := stack[len(stack)-1]
+		var shouldContinue bool
 
-	if !visitedMap[node.id] {
-		visitedMap[node.id] = true
+		if !visitedMap[node.id] {
+			visitedMap[node.id] = true
+
+			if node.isParam {
+				params[node.label] = node.getPathParam(path, pos)
+			}
+
+			if node.searchFinished(path, pos) {
+				return node.handlerMap, params, true
+			}
+		}
+
+		for _, child := range node.children {
+			if !visitedMap[child.id] && child.doesMatch(path, pos+1) {
+				// Push child to the stack.
+				stack = append(stack, child)
+				pos++
+				shouldContinue = true
+				break
+			}
+		}
+
+		if shouldContinue {
+			continue
+		}
 
 		if node.isParam {
-			params[node.label] = node.getPathParam(path, pos)
+			delete(params, node.label)
 		}
 
-		if node.searchFinished(path, pos) {
-			return node.handlerMap, params, true
-		}
+		// Pop from stack.
+		stack = stack[:len(stack)-1]
+		pos--
 	}
 
-	for _, child := range node.children {
-		if !visitedMap[child.id] && child.doesMatch(path, pos+1) {
-			stack = append(stack, child)
-			return searchDFS(stack, visitedMap, params, path, pos+1)
-		}
-	}
-
-	if node.isParam {
-		delete(params, node.label)
-	}
-
-	stack = stack[:len(stack)-1]
-	return searchDFS(stack, visitedMap, params, path, pos-1)
+	return nil, params, false
 }
 
 // search searches the Tree and tries to match the path to a handler if possible.
 func (t Tree) search(path, method string) (handlerMiddleware, Params, error) {
 	segments := strings.Split(path, "/")
-	stack := []*Node{t.root}
-	visitedMap := map[uint32]bool{}
-	params := make(Params)
 
-	hmMap, params, found := searchDFS(stack, visitedMap, params, segments, 0)
+	hmMap, params, found := t.searchDFS(segments)
 
 	if !found {
 		return handlerMiddleware{}, params, errNotFound
