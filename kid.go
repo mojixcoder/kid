@@ -1,6 +1,7 @@
 package kid
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -28,6 +29,8 @@ type (
 	//
 	// It's a framework instance.
 	Kid struct {
+		server                  *http.Server
+		mutex                   sync.Mutex
 		router                  Tree
 		middlewares             []MiddlewareFunc
 		notFoundHandler         HandlerFunc
@@ -61,6 +64,7 @@ func New() *Kid {
 		xmlSerializer:           serializer.NewXMLSerializer(),
 		htmlRenderer:            htmlrenderer.Default(false),
 		debug:                   true,
+		mutex:                   sync.Mutex{},
 	}
 
 	kid.pool.New = func() any {
@@ -80,7 +84,19 @@ func (k *Kid) Run(address ...string) error {
 	k.printDebug(os.Stdout, "Starting server at %s\n", addr)
 	k.printDebug(os.Stdout, "Quit the server with CONTROL-C\n")
 
-	return http.ListenAndServe(addr, k)
+	k.mutex.Lock()
+	k.server = &http.Server{Addr: addr, Handler: k}
+	k.mutex.Unlock()
+
+	return k.server.ListenAndServe()
+}
+
+// Shutdown gracefully shuts down the server without interrupting any active connections.
+func (k *Kid) Shutdown(ctx context.Context) error {
+	k.mutex.Lock()
+	defer k.mutex.Unlock()
+
+	return k.server.Shutdown(ctx)
 }
 
 // Use registers a new middleware. The middleware will be applied to all of the routes.
