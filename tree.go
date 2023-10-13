@@ -220,10 +220,10 @@ func (t Tree) searchDFS(path []string) (map[string]handlerMiddleware, Params, bo
 	var pos int
 
 	// Search while stack is not empty.
+SearchLoop:
 	for len(stack) != 0 {
 		// Accessing last element.
 		node := stack[len(stack)-1]
-		var shouldContinue bool
 
 		if !visitedMap[node.id] {
 			visitedMap[node.id] = true
@@ -242,13 +242,8 @@ func (t Tree) searchDFS(path []string) (map[string]handlerMiddleware, Params, bo
 				// Push child to the stack.
 				stack = append(stack, child)
 				pos++
-				shouldContinue = true
-				break
+				continue SearchLoop
 			}
-		}
-
-		if shouldContinue {
-			continue
 		}
 
 		if node.isParam {
