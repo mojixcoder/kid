@@ -77,18 +77,27 @@ func New() *Kid {
 // Run runs HTTP server.
 //
 // Specifying an address is optional. Default address is :2376.
-func (k *Kid) Run(address ...string) error {
-	addr := resolveAddress(address, runtime.GOOS)
+func (k *Kid) Run(addrs ...string) error {
+	address := k.setUpServer(addrs)
 
 	k.printDebug(os.Stdout, "Kid version %s\n", Version)
-	k.printDebug(os.Stdout, "Starting server at %s\n", addr)
+	k.printDebug(os.Stdout, "Starting server at %s\n", address)
 	k.printDebug(os.Stdout, "Quit the server with CONTROL-C\n")
 
-	k.mutex.Lock()
-	k.server = &http.Server{Addr: addr, Handler: k}
-	k.mutex.Unlock()
-
 	return k.server.ListenAndServe()
+}
+
+// Run runs HTTPS server.
+//
+// Specifying an address is optional. Default address is :2376.
+func (k *Kid) RunTLS(certFile, keyFile string, addrs ...string) error {
+	address := k.setUpServer(addrs)
+
+	k.printDebug(os.Stdout, "Kid version %s\n", Version)
+	k.printDebug(os.Stdout, "Starting TLS server at %s\n", address)
+	k.printDebug(os.Stdout, "Quit the server with CONTROL-C\n")
+
+	return k.server.ListenAndServeTLS(certFile, keyFile)
 }
 
 // Shutdown gracefully shuts down the server without interrupting any active connections.
@@ -265,6 +274,17 @@ func (k *Kid) ApplyOptions(opts ...Option) {
 
 		opt.apply(k)
 	}
+}
+
+// setupServer sets up the server.
+func (k *Kid) setUpServer(addrs []string) string {
+	address := resolveAddress(addrs, runtime.GOOS)
+
+	k.mutex.Lock()
+	defer k.mutex.Unlock()
+
+	k.server = &http.Server{Addr: address, Handler: k}
+	return address
 }
 
 // printDebug prints logs only in debug mode.

@@ -3,6 +3,7 @@ package kid
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
@@ -447,6 +448,39 @@ func TestKid_Run(t *testing.T) {
 	assert.Equal(t, "{\"message\":\"healthy\"}\n", string(body))
 }
 
+func TestKid_RunTLS(t *testing.T) {
+	k := New()
+
+	k.Get("/", func(c *Context) {
+		c.JSON(http.StatusOK, Map{"message": "healthy"})
+	})
+
+	go func() {
+		err := k.RunTLS("./testdata/certs/localhost.crt", "./testdata/certs/localhost.key", ":8686")
+		assert.NoError(t, err)
+	}()
+
+	// Wait for the server to start
+	time.Sleep(5 * time.Millisecond)
+
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	resp, err := client.Get("https://localhost:8686")
+	assert.NoError(t, err)
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+	assert.Equal(t, "{\"message\":\"healthy\"}\n", string(body))
+}
+
 func TestKid_Shutdown(t *testing.T) {
 	k := New()
 
@@ -459,6 +493,15 @@ func TestKid_Shutdown(t *testing.T) {
 	time.Sleep(5 * time.Millisecond)
 
 	assert.NoError(t, k.Shutdown(context.Background()))
+}
+
+func TestKid_setUpServer(t *testing.T) {
+	k := New()
+
+	address := k.setUpServer([]string{":2377"})
+
+	assert.NotNil(t, k.server)
+	assert.Equal(t, ":2377", address)
 }
 
 func TestKid_Static(t *testing.T) {
