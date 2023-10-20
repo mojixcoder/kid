@@ -79,14 +79,7 @@ func NewLogger() kid.MiddlewareFunc {
 func NewLoggerWithConfig(cfg LoggerConfig) kid.MiddlewareFunc {
 	setLoggerDefaults(&cfg)
 
-	logger := new(slog.Logger)
-
-	if cfg.Logger == nil {
-		logHandler := cfg.getLogHandler()
-		logger = slog.New(logHandler)
-	} else {
-		logger = cfg.Logger
-	}
+	logger := cfg.getLogger()
 
 	successLvl := cfg.SuccessLevel.Level()
 	clientErrLvl := cfg.ClientErrorLevel.Level()
@@ -131,13 +124,17 @@ func NewLoggerWithConfig(cfg LoggerConfig) kid.MiddlewareFunc {
 	}
 }
 
-// getLogHandler returns the appropriate log handler.
-func (cfg LoggerConfig) getLogHandler() slog.Handler {
+// getLogger returns the appropriate logger instance.
+func (cfg LoggerConfig) getLogger() *slog.Logger {
+	if cfg.Logger != nil {
+		return cfg.Logger
+	}
+
 	switch cfg.Type {
 	case TypeJSON:
-		return slog.NewJSONHandler(cfg.Out, &slog.HandlerOptions{Level: cfg.Level})
+		return slog.New(slog.NewJSONHandler(cfg.Out, &slog.HandlerOptions{Level: cfg.Level}))
 	case TypeText:
-		return slog.NewTextHandler(cfg.Out, &slog.HandlerOptions{Level: cfg.Level})
+		return slog.New(slog.NewTextHandler(cfg.Out, &slog.HandlerOptions{Level: cfg.Level}))
 	default:
 		panic("invalid logger type")
 	}
