@@ -54,10 +54,10 @@ type (
 
 const (
 	// JSONLogger is the JSON logger type.
-	JSONLogger LoggerType = "JSON"
+	TypeJSON LoggerType = "JSON"
 
 	// TextLogger is the text logger type.
-	TextLogger LoggerType = "TEXT"
+	TypeText LoggerType = "TEXT"
 )
 
 // DefaultLoggerConfig is the default logger config.
@@ -67,7 +67,7 @@ var DefaultLoggerConfig = LoggerConfig{
 	SuccessLevel:     slog.LevelInfo,
 	ClientErrorLevel: slog.LevelWarn,
 	ServerErrorLevel: slog.LevelError,
-	Type:             JSONLogger,
+	Type:             TypeJSON,
 }
 
 // NewLogger returns a new logger middleware.
@@ -134,9 +134,9 @@ func NewLoggerWithConfig(cfg LoggerConfig) kid.MiddlewareFunc {
 // getLogHandler returns the appropriate log handler.
 func (cfg LoggerConfig) getLogHandler() slog.Handler {
 	switch cfg.Type {
-	case JSONLogger:
+	case TypeJSON:
 		return slog.NewJSONHandler(cfg.Out, &slog.HandlerOptions{Level: cfg.Level})
-	case TextLogger:
+	case TypeText:
 		return slog.NewTextHandler(cfg.Out, &slog.HandlerOptions{Level: cfg.Level})
 	default:
 		panic("invalid logger type")
