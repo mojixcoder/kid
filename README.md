@@ -4,7 +4,7 @@
 
 ### Kid Micro Web Framework
 ___
-**Kid** is a micro web framework written in Go. It aims to keep its core simple and yet powerful. It's fully compatible with net/http interfaces and can be adapt with other net/http compatible packages as well.
+**Kid** is a micro web framework written in Go. It aims to keep its core simple and yet powerful. It's fully compatible with net/http interfaces and can be adapted with other net/http compatible packages as well.
 
 ### Routing
 ___
