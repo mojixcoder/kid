@@ -8,7 +8,7 @@ ___
 
 ### Routing
 ___
-**Kid** uses a tree-based router as its router with a DFS traversal algorithm.
+**Kid** uses a tree-based router with a DFS traversal algorithm.
 
 ### Versioning
 ___
