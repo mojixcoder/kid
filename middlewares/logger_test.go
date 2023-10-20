@@ -79,11 +79,18 @@ func TestNewLoggerWithConfig(t *testing.T) {
 	k.Use(NewLoggerWithConfig(cfg))
 
 	k.Get("/", func(c *kid.Context) {
+		time.Sleep(time.Millisecond)
 		c.String(http.StatusOK, "Ok")
 	})
 
 	k.Get("/server-error", func(c *kid.Context) {
+		time.Sleep(time.Millisecond)
 		c.String(http.StatusInternalServerError, "Internal Server Error")
+	})
+
+	k.Get("/not-found", func(c *kid.Context) {
+		time.Sleep(time.Millisecond)
+		c.String(http.StatusNotFound, "Not Found")
 	})
 
 	testCases := []struct {
