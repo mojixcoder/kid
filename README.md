@@ -6,9 +6,16 @@
 ___
 **Kid** is a micro web framework written in Go. It aims to keep its core simple and yet powerful. It's fully compatible with net/http interfaces and can be adapted with other net/http compatible packages as well.
 
-### Routing
+### Features
 ___
-**Kid** uses a tree-based router with a DFS traversal algorithm.
+- Robust tree-based router.
+- Path parameters.
+- Router groups.
+- Rich built-in responses(JSON, XML, string, string, byte).
+- Middlewares.
+- Zero dependency, only standard library.
+- Compatible with net/http interfaces.
+- Extendable, you can also use your own JSON, XML and HTML parsers.
 
 ### Versioning
 ___
@@ -17,7 +24,7 @@ This package follows [semver](https://semver.org/) versioning.
 #### Quick Start
 ___
 
-To install Kid Go 1.18 or higher is required: `go get github.com/mojixcoder/kid`
+To install Kid Go 1.19 or higher is required: `go get github.com/mojixcoder/kid`
 
 Create `server.go`:
 
