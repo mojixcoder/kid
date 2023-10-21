@@ -1,6 +1,7 @@
 package kid
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"sync"
@@ -241,6 +242,36 @@ func (c *Context) Get(key string) (any, bool) {
 
 	val, ok := c.storage[key]
 	return val, ok
+}
+
+// Clone clones the context and returns it.
+//
+// Should be used when context is passed to the background jobs.
+//
+// Writes to the response of a cloned context will panic.
+func (c *Context) Clone() *Context {
+	ctx := Context{
+		request:  c.request.Clone(context.Background()),
+		response: c.response.(*response).clone(),
+		kid:      c.kid,
+		lock:     sync.Mutex{},
+	}
+
+	// Copy path params.
+	params := make(Params, len(c.params))
+	for k, v := range c.params {
+		params[k] = v
+	}
+	ctx.params = params
+
+	// Copy storage.
+	storage := make(Map, len(c.storage))
+	for k, v := range c.storage {
+		storage[k] = v
+	}
+	ctx.storage = storage
+
+	return &ctx
 }
 
 // Debug returns whether we are in debug mode or not.

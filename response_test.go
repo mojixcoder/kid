@@ -104,3 +104,19 @@ func TestResponseWriter_Status(t *testing.T) {
 
 	assert.Equal(t, http.StatusAccepted, res.Status())
 }
+
+func TestResponse_clone(t *testing.T) {
+	res := newResponse(httptest.NewRecorder()).(*response)
+	res.size = 10
+	res.status = 200
+	res.written = true
+
+	clonedRes := res.clone()
+
+	assert.NotEqual(t, res, clonedRes)
+	assert.NotNil(t, res.ResponseWriter)
+	assert.Nil(t, clonedRes.ResponseWriter)
+	assert.Equal(t, res.size, clonedRes.size)
+	assert.Equal(t, res.written, clonedRes.written)
+	assert.Equal(t, res.status, clonedRes.status)
+}

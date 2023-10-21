@@ -104,3 +104,11 @@ func (r *response) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	r.written = true
 	return r.ResponseWriter.(http.Hijacker).Hijack()
 }
+
+// clone clones the current response instance.
+//
+// No writes are permitted.
+func (r response) clone() *response {
+	r.ResponseWriter = nil
+	return &r
+}
