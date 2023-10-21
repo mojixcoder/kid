@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"reflect"
 	"runtime"
@@ -223,7 +222,7 @@ func (k *Kid) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := k.pool.Get().(*Context)
 	c.reset(r, w)
 
-	route, params, err := k.router.search(getPath(r.URL), r.Method)
+	route, params, err := k.router.search(c.Path(), r.Method)
 
 	c.setParams(params)
 
@@ -292,14 +291,6 @@ func (k *Kid) printDebug(w io.Writer, format string, values ...any) {
 	if k.Debug() {
 		fmt.Fprintf(w, "[DEBUG] "+format, values...)
 	}
-}
-
-// getPath returns request's path.
-func getPath(u *url.URL) string {
-	if u.RawPath != "" {
-		return u.RawPath
-	}
-	return u.Path
 }
 
 // resolveAddress returns the address which server will run on.
