@@ -6,6 +6,8 @@ import (
 	"sync"
 )
 
+const contentTypeHeader string = "Content-Type"
+
 // Context is the context of current HTTP request.
 // It holds data related to current HTTP request.
 type Context struct {
@@ -219,7 +221,6 @@ func (c *Context) GetRequestHeader(key string) string {
 // writeContentType sets content type header for response.
 // It won't overwrite content type if it's already set.
 func (c *Context) writeContentType(contentType string) {
-	contentTypeHeader := "Content-Type"
 	if c.GetResponseHeader(contentTypeHeader) == "" {
 		c.SetResponseHeader(contentTypeHeader, contentType)
 	}
