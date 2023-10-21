@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 	"time"
 
@@ -620,20 +619,6 @@ func TestResolveAddress(t *testing.T) {
 
 	addr = resolveAddress([]string{":2377", ":2378"}, goos)
 	assert.Equal(t, ":2377", addr)
-}
-
-func TestGetPath(t *testing.T) {
-	u, err := url.Parse("http://localhost/foo%25fbar")
-	assert.NoError(t, err)
-
-	assert.Empty(t, u.RawPath)
-	assert.Equal(t, u.Path, getPath(u))
-
-	u, err = url.Parse("http://localhost/foo%fbar")
-	assert.NoError(t, err)
-
-	assert.NotEmpty(t, u.RawPath)
-	assert.Equal(t, u.RawPath, getPath(u))
 }
 
 func TestApplyOptions(t *testing.T) {

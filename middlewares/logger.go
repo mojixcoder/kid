@@ -98,7 +98,6 @@ func NewLoggerWithConfig(cfg LoggerConfig) kid.MiddlewareFunc {
 			next(c)
 
 			end := time.Now()
-			req := c.Request()
 			duration := end.Sub(start)
 
 			status := c.Response().Status()
@@ -108,9 +107,9 @@ func NewLoggerWithConfig(cfg LoggerConfig) kid.MiddlewareFunc {
 				slog.Duration("latency_ns", duration),
 				slog.String("latency", duration.String()),
 				slog.Int("status", status),
-				slog.String("path", req.URL.Path),
-				slog.String("method", req.Method),
-				slog.String("user_agent", req.Header.Get("User-Agent")),
+				slog.String("path", c.Path()),
+				slog.String("method", c.Method()),
+				slog.String("user_agent", c.GetRequestHeader("User-Agent")),
 			}
 
 			if status < 400 {
