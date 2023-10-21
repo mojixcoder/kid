@@ -56,6 +56,20 @@ func (c *Context) Params() Params {
 	return c.params
 }
 
+// Path returns request's path used for matching request to a handler.
+func (c *Context) Path() string {
+	u := c.request.URL
+	if u.RawPath != "" {
+		return u.RawPath
+	}
+	return u.Path
+}
+
+// Method returns request method.
+func (c *Context) Method() string {
+	return c.request.Method
+}
+
 // QueryParam returns value of a query parameter
 func (c *Context) QueryParam(name string) string {
 	queryParam := c.request.URL.Query().Get(name)

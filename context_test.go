@@ -534,3 +534,28 @@ func TestContext_SetRequestHeader(t *testing.T) {
 	ctx.SetRequestHeader("key", "value")
 	assert.Equal(t, "value", ctx.GetRequestHeader("key"))
 }
+
+func TestContext_Path(t *testing.T) {
+	ctx := newContext(New())
+
+	req := httptest.NewRequest(http.MethodGet, "/path", nil)
+	req.URL.Path = "/path"
+	req.URL.RawPath = ""
+
+	ctx.reset(req, nil)
+
+	assert.Equal(t, "/path", ctx.Path())
+
+	req.URL.RawPath = "/path2"
+	assert.Equal(t, "/path2", ctx.Path())
+}
+
+func TestContext_Method(t *testing.T) {
+	ctx := newContext(New())
+
+	req := httptest.NewRequest(http.MethodDelete, "/path", nil)
+
+	ctx.reset(req, nil)
+
+	assert.Equal(t, http.MethodDelete, ctx.Method())
+}
