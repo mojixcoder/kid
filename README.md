@@ -11,7 +11,7 @@ ___
 - Robust tree-based router.
 - Path parameters.
 - Router groups.
-- Rich built-in responses(JSON, XML, string, string, byte).
+- Rich built-in responses(JSON, HTML, XML, string, byte).
 - Middlewares.
 - Zero dependency, only standard library.
 - Compatible with net/http interfaces.
