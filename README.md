@@ -15,7 +15,7 @@ ___
 - Middlewares.
 - Zero dependency, only standard library.
 - Compatible with net/http interfaces.
-- Extendable, you can also use your own JSON, XML and HTML parsers.
+- Extendable, you can also use your own JSON, XML serializers or HTML renderer.
 
 ### Versioning
 ___
