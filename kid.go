@@ -43,7 +43,7 @@ type (
 )
 
 // Version of Kid.
-const Version string = "v0.3.0"
+const Version string = "v0.4.0"
 
 // allMethods is a list of all HTTP methods.
 var allMethods = []string{
