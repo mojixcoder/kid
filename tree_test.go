@@ -71,7 +71,7 @@ func TestNode_addHanlder(t *testing.T) {
 
 	assert.PanicsWithValue(
 		t,
-		"handler is already registered for method GET and node &{id:0 label: children:[] isParam:false isStar:false handlerMap:map[GET:{handler:<nil> middlewares:[]} POST:{handler:<nil> middlewares:[]}]}.",
+		"handler is already registered for method GET and node &{id:0 label: children:[] isParam:false isStar:false handlerMap:map[GET:{handler:<nil> middlewares:[] name:} POST:{handler:<nil> middlewares:[] name:}]}.",
 		func() {
 			node.addHanlder([]string{http.MethodGet, http.MethodPost}, handlerMiddleware{})
 		},
