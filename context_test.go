@@ -592,3 +592,11 @@ func TestContext_Clone(t *testing.T) {
 		clonedCtx.Response().Status()
 	})
 }
+
+func TestContext_Route(t *testing.T) {
+	ctx := newContext(New())
+
+	ctx.setRouteName("route_name")
+
+	assert.Equal(t, "route_name", ctx.Route())
+}

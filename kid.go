@@ -43,7 +43,7 @@ type (
 )
 
 // Version of Kid.
-const Version string = "v0.3.0"
+const Version string = "v0.4.0"
 
 // allMethods is a list of all HTTP methods.
 var allMethods = []string{
@@ -230,11 +230,14 @@ func (k *Kid) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if err == errNotFound {
 		handler = k.applyMiddlewaresToHandler(k.notFoundHandler, k.middlewares...)
+		c.setRouteName("Not Found")
 	} else if err == errMethodNotAllowed {
 		handler = k.applyMiddlewaresToHandler(k.methodNotAllowedHandler, k.middlewares...)
+		c.setRouteName("Method Not Allowed")
 	} else {
 		handler = k.applyMiddlewaresToHandler(route.handler, route.middlewares...)
 		handler = k.applyMiddlewaresToHandler(handler, k.middlewares...)
+		c.setRouteName(route.name)
 	}
 
 	handler(c)

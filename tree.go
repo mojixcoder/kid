@@ -24,8 +24,14 @@ const (
 type (
 	// handlerMiddleware zips a handler and its middlewares to each other.
 	handlerMiddleware struct {
-		handler     HandlerFunc
+		// handler is the route request handler.
+		handler HandlerFunc
+
+		// middlewares is route middlewares.
 		middlewares []MiddlewareFunc
+
+		// name is route name.
+		name string
 	}
 
 	// Tree is a tree used for routing.
@@ -112,11 +118,12 @@ func (t *Tree) insertNode(path string, methods []string, middlewares []Middlewar
 				currNode = child
 			}
 		} else { // Only for the last iteration of the for loop.
+			hm := handlerMiddleware{handler: handler, middlewares: middlewares, name: path}
 			if child := currNode.getChild(node.label, node.isParam, node.isStar); child == nil {
-				node.addHanlder(methods, handlerMiddleware{handler: handler, middlewares: middlewares})
+				node.addHanlder(methods, hm)
 				currNode.addChild(&node)
 			} else {
-				child.addHanlder(methods, handlerMiddleware{handler: handler, middlewares: middlewares})
+				child.addHanlder(methods, hm)
 			}
 		}
 	}
@@ -185,6 +192,7 @@ func (n *Node) addHanlder(methods []string, hm handlerMiddleware) {
 	}
 }
 
+// setLabel sets the node's appropriate label.
 func (n *Node) setLabel(label string) {
 	n.label = label
 	if n.isParam {

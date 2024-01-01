@@ -71,7 +71,7 @@ func TestNode_addHanlder(t *testing.T) {
 
 	assert.PanicsWithValue(
 		t,
-		"handler is already registered for method GET and node &{id:0 label: children:[] isParam:false isStar:false handlerMap:map[GET:{handler:<nil> middlewares:[]} POST:{handler:<nil> middlewares:[]}]}.",
+		"handler is already registered for method GET and node &{id:0 label: children:[] isParam:false isStar:false handlerMap:map[GET:{handler:<nil> middlewares:[] name:} POST:{handler:<nil> middlewares:[] name:}]}.",
 		func() {
 			node.addHanlder([]string{http.MethodGet, http.MethodPost}, handlerMiddleware{})
 		},
@@ -123,6 +123,7 @@ func TestTree_insertNode(t *testing.T) {
 	assert.True(t, ok)
 	assert.True(t, funcsAreEqual(hm.handler, testHandlerFunc))
 	assert.Nil(t, hm.middlewares)
+	assert.Equal(t, "/test/path", hm.name)
 
 	tree.insertNode("/test", []string{http.MethodPost}, []MiddlewareFunc{testMiddlewareFunc}, testHandlerFunc)
 
@@ -140,6 +141,7 @@ func TestTree_insertNode(t *testing.T) {
 	assert.True(t, ok)
 	assert.True(t, funcsAreEqual(hm.handler, testHandlerFunc))
 	assert.Len(t, hm.middlewares, 1)
+	assert.Equal(t, "/test", hm.name)
 }
 
 func TestNode_insert_Panics(t *testing.T) {

@@ -98,15 +98,16 @@ func NewLoggerWithConfig(cfg LoggerConfig) kid.MiddlewareFunc {
 			next(c)
 
 			end := time.Now()
-			duration := end.Sub(start)
+			elapsed := end.Sub(start)
 
 			status := c.Response().Status()
 
 			attrs := []slog.Attr{
 				slog.Time("time", end),
-				slog.Duration("latency_ns", duration),
-				slog.String("latency", duration.String()),
+				slog.Int64("latency_ms", elapsed.Milliseconds()),
+				slog.String("latency", elapsed.String()),
 				slog.Int("status", status),
+				slog.String("route", c.Route()),
 				slog.String("path", c.Path()),
 				slog.String("method", c.Method()),
 				slog.String("user_agent", c.GetRequestHeader("User-Agent")),
