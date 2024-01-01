@@ -17,7 +17,6 @@ var (
 const (
 	paramPrefix     = "{"
 	paramSuffix     = "}"
-	plusParamPrefix = paramPrefix + "+"
 	starParamPrefix = paramPrefix + "*"
 )
 
