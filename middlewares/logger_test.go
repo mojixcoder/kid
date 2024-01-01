@@ -19,9 +19,10 @@ import (
 type logRecord struct {
 	Msg       string    `json:"msg"`
 	Time      time.Time `json:"time"`
-	LatenyNS  int64     `json:"latency_ns"`
+	LatenyMS  int64     `json:"latency_ms"`
 	Latency   string    `json:"latency"`
 	Status    int       `json:"status"`
+	Route     string    `json:"route"`
 	Path      string    `json:"path"`
 	Method    string    `json:"method"`
 	UserAgent string    `json:"user_agent"`
@@ -119,11 +120,12 @@ func TestNewLoggerWithConfig(t *testing.T) {
 
 			assert.Equal(t, testCase.status, logRecord.Status)
 			assert.Equal(t, testCase.path, logRecord.Path)
+			assert.Equal(t, testCase.path, logRecord.Route)
 			assert.Equal(t, http.MethodGet, logRecord.Method)
 			assert.Equal(t, "Go Test", logRecord.UserAgent)
 			assert.NotZero(t, logRecord.Time)
 			assert.NotEmpty(t, logRecord.Latency)
-			assert.NotEmpty(t, logRecord.LatenyNS)
+			assert.NotEmpty(t, logRecord.LatenyMS)
 			assert.Equal(t, testCase.msg, logRecord.Msg)
 		})
 	}

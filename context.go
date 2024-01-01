@@ -12,12 +12,13 @@ const contentTypeHeader string = "Content-Type"
 // Context is the context of current HTTP request.
 // It holds data related to current HTTP request.
 type Context struct {
-	request  *http.Request
-	response ResponseWriter
-	params   Params
-	storage  Map
-	kid      *Kid
-	lock     sync.Mutex
+	request   *http.Request
+	response  ResponseWriter
+	params    Params
+	storage   Map
+	kid       *Kid
+	lock      sync.Mutex
+	routeName string
 }
 
 // newContext returns a new empty context.
@@ -32,11 +33,17 @@ func (c *Context) reset(request *http.Request, response http.ResponseWriter) {
 	c.response = newResponse(response)
 	c.storage = make(Map)
 	c.params = make(Params)
+	c.routeName = ""
 }
 
 // setParams sets request's path parameters.
 func (c *Context) setParams(params Params) {
 	c.params = params
+}
+
+// setRouteName sets the route name.
+func (c *Context) setRouteName(name string) {
+	c.routeName = name
 }
 
 // Request returns plain request of current HTTP request.
@@ -66,6 +73,12 @@ func (c *Context) Path() string {
 		return u.RawPath
 	}
 	return u.Path
+}
+
+// Route returns current request's route name.
+// It's the user entered path, e.g. /greet/{name}.
+func (c *Context) Route() string {
+	return c.routeName
 }
 
 // Method returns request method.
@@ -251,10 +264,11 @@ func (c *Context) Get(key string) (any, bool) {
 // Writes to the response of a cloned context will panic.
 func (c *Context) Clone() *Context {
 	ctx := Context{
-		request:  c.request.Clone(context.Background()),
-		response: c.response.(*response).clone(),
-		kid:      c.kid,
-		lock:     sync.Mutex{},
+		request:   c.request.Clone(context.Background()),
+		response:  c.response.(*response).clone(),
+		kid:       c.kid,
+		lock:      sync.Mutex{},
+		routeName: c.routeName,
 	}
 
 	// Copy path params.

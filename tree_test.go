@@ -123,6 +123,7 @@ func TestTree_insertNode(t *testing.T) {
 	assert.True(t, ok)
 	assert.True(t, funcsAreEqual(hm.handler, testHandlerFunc))
 	assert.Nil(t, hm.middlewares)
+	assert.Equal(t, "/test/path", hm.name)
 
 	tree.insertNode("/test", []string{http.MethodPost}, []MiddlewareFunc{testMiddlewareFunc}, testHandlerFunc)
 
@@ -140,6 +141,7 @@ func TestTree_insertNode(t *testing.T) {
 	assert.True(t, ok)
 	assert.True(t, funcsAreEqual(hm.handler, testHandlerFunc))
 	assert.Len(t, hm.middlewares, 1)
+	assert.Equal(t, "/test", hm.name)
 }
 
 func TestNode_insert_Panics(t *testing.T) {
