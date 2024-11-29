@@ -24,7 +24,7 @@ This package follows [semver](https://semver.org/) versioning.
 #### Quick Start
 ___
 
-To install Kid Go 1.19 or higher is required: `go get github.com/mojixcoder/kid`
+To install Kid Go 1.21 or higher is required: `go get github.com/mojixcoder/kid`
 
 Create `server.go`:
 
